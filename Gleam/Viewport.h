@@ -23,8 +23,8 @@
 
 class Viewport {
 private:
-	glm::vec2 pos;
-	glm::vec2 size;
+	glm::vec2 _position;
+	glm::vec2 _size;
 
 public:
 	Scene* scene = nullptr;
@@ -32,6 +32,9 @@ public:
 
 	Viewport(int x, int y, unsigned width, unsigned height);
 	Viewport(glm::vec2 pos, glm::vec2 size);
+
+	glm::vec2 getPosition();
+	glm::vec2 getSize();
 
 	void render();
 };

@@ -2,7 +2,7 @@
 
 #include "PointLight.h"
 
-class SpotLight : PointLight {
+class SpotLight : public PointLight {
 public:
 	glm::vec3 normal;
 	float cutoff;

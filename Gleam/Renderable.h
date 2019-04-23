@@ -12,8 +12,7 @@ protected:
 public:
 	Transform transform;
 
-	glm::mat4 getModelMatrix();
-	glm::mat3 getNormalMatrix();
+	glm::mat3 getNormalMatrix() const;
 
 	virtual void render(const Camera& camera) = 0;
 };
