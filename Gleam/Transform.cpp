@@ -29,7 +29,7 @@ void Transform::rotate(const glm::quat& quaternion) {
 }
 
 void Transform::rotate(const glm::vec3& euler) {
-	_rotation *= glm::toQuat(glm::orientate3(euler));
+	_rotation *= glm::quat(glm::radians(euler));
 }
 
 void Transform::lookAt(const glm::vec3& target, const glm::vec3& up) {
@@ -65,7 +65,7 @@ void Transform::setPosition(const glm::vec3& position) {
 }
 
 void Transform::setRotation(const glm::vec3& euler) {
-	_rotation = glm::toQuat(glm::orientate3(euler));
+	_rotation = glm::quat(glm::radians(euler));
 }
 
 void Transform::setRotation(const glm::quat& quaternion) {
