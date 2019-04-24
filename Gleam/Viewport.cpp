@@ -7,3 +7,7 @@ glm::vec2 Viewport::getPosition() {
 glm::vec2 Viewport::getSize() {
 	return _size;
 }
+
+void Viewport::render() {
+
+}

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glad/glad.h>
+
 #include <string>
 #include <vector>
 #include <iostream>
@@ -7,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/vec2.hpp>
 
+#include "Texture.h"
 #include "Viewport.h"
 
 class Window {
@@ -17,7 +20,7 @@ private:
 	static std::vector<Window*> _windows;
 	
 	static bool _backendReady;
-	static bool initBackend();
+	static void initBackend();
 
 	static void keyCallSwitch(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void mouseCallSwitch(GLFWwindow* window, double xPos, double yPos);
@@ -38,6 +41,8 @@ public:
 	KeyCallback keyCallback = nullptr;
 	MouseCallback mouseCallback = nullptr;
 	ScrollCallback scrollCallback = nullptr;
+
+	Window(std::string title, unsigned int width, unsigned int height);
 
 	void addViewport(Viewport* viewport);
 	void removeViewport(Viewport* viewport);

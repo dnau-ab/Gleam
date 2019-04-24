@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
 #include <algorithm>
 
 #include <glm/glm.hpp>

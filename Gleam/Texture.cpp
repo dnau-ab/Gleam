@@ -1,9 +1,6 @@
 #include "Texture.h"
 
 void Texture::load(const std::string& path, const std::string& type) {
-	
-	//glGenTextures(1, &_id);
-
 	_type = type;
 
 	// get directory and file name

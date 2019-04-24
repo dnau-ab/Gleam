@@ -9,8 +9,9 @@
 #include <iomanip>
 #include <assert.h>
 
-#include "Transform.h"
+#include "Window.h"
 #include "Texture.h"
+#include "Transform.h"
 
 using std::cout;
 using std::endl;

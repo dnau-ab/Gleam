@@ -1,5 +1,12 @@
 #include "Window.h"
 
+bool Window::_backendReady = false;
+
+glm::vec2 Window::_size;
+glm::vec2 Window::_scale;
+
+std::vector<Window*> Window::_windows;
+
 void Window::keyCallSwitch(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	for (size_t i = 0; i < _windows.size(); i++) {
 		if (window == _windows[i]->_window) {
@@ -38,15 +45,54 @@ void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) 
 	_scale.y = height / _size.y;
 }
 
-bool Window::initBackend() {
-	bool backendReady = glfwInit();
+void Window::initBackend() {
+	_backendReady = glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // needed for Mac
 #endif
-	return Window::_backendReady;
+}
+
+Window::Window(std::string title, unsigned int width, unsigned int height) {
+	_size.x = width;
+	_size.y = height;
+	_title = title;
+
+	if (!_backendReady) {
+		initBackend();
+	}
+	if (_backendReady) {
+		_window = glfwCreateWindow(_size.x, _size.y, _title.c_str(), nullptr, nullptr);
+		if (!_window) {
+			std::cout << "Failed to create GLFW window" << std::endl;
+			glfwTerminate();
+			exit(1);
+		}
+		glfwMakeContextCurrent(_window);
+
+		// set callbacks
+		glfwSetFramebufferSizeCallback(_window, framebufferSizeCallback);
+		glfwSetKeyCallback(_window, keyCallSwitch);
+		glfwSetCursorPosCallback(_window, mouseCallSwitch);
+		glfwSetScrollCallback(_window, scrollCallSwitch);
+		glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+		// initialize GLAD
+		// load all OpenGL function pointers
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+			std::cout << "Failed to initialize GLAD" << std::endl;
+			exit(1);
+		}
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_SCISSOR_TEST);
+		glEnable(GL_STENCIL_TEST);
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+		framebufferSizeCallback(_window, _size.x, _size.y);
+		Window::_windows.push_back(this);
+	}
 }
 
 void Window::addViewport(Viewport* viewport) {

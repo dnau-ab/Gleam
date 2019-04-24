@@ -1,10 +1,9 @@
 
 #include "TestUtils.h"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
 int main() {
+	Window w("Gleam", 800, 600);
+
 	testTransforms();
 	testTexture();
 
