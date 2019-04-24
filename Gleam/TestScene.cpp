@@ -1,12 +1,4 @@
-#include <assert.h>
-
-#include "Scene.h"
-
-#include "DirectionalLight.h"
-#include "PointLight.h"
-#include "SpotLight.h"
-
-#include "Model.h"
+#include "TestUtils.h"
 
 void testScene() {
 	Scene scene;

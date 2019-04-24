@@ -4,8 +4,10 @@
 int main() {
 	Window w("Gleam", 800, 600);
 
-	testTransforms();
+	testWindow();
+	testTransform();
 	testTexture();
+	testScene();
 
 	return 0;
 }

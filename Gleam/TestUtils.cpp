@@ -27,3 +27,8 @@ void _print(glm::mat4 m) {
 void _print(glm::quat q) {
 	printf("<%f, %f, %f, %f>\n", q.x, q.y, q.z, q.w);
 }
+
+
+bool _approxEqual(double a, double b) {
+	return (std::abs(a - b) < 0.01);
+}

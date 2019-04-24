@@ -1,6 +1,6 @@
 #include "TestUtils.h"
 
-void testTransforms() {
+void testTransform() {
 	Transform t1;
 	Transform t2(glm::vec3(10.0f, -10.0f, 0.0f));
 	Transform t3(glm::vec3(0.0f, 0.0f, 100.0f), glm::quat(glm::vec3(0.3, 0.2f, 0.0f)));

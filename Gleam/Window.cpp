@@ -96,7 +96,9 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 }
 
 void Window::addViewport(Viewport* viewport) {
-	_viewports.push_back(viewport);
+	if (viewport != nullptr) {
+		_viewports.push_back(viewport);
+	}
 }
 
 void Window::removeViewport(Viewport* viewport) {

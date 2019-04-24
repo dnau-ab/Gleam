@@ -5,6 +5,7 @@
 #include <assimp/postprocess.h>
 
 #include <vector>
+#include <queue>
 
 #include "Mesh.h"
 
