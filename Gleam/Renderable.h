@@ -7,12 +7,13 @@
 
 class Renderable {
 protected:
-	Shader* shader;
-
+	Shader* _shader;
+	ShaderResource* _shaderResource;
 public:
 	Transform transform;
 
 	glm::mat3 getNormalMatrix() const;
+	void setResource(ShaderResource& resource);
 
 	virtual void render(const Camera& camera) = 0;
 };
