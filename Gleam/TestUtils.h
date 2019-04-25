@@ -34,5 +34,8 @@ bool _approxEqual(double a, double b);
 void testWindow();
 void testTransform();
 void testTexture();
+void testMeshLoader();
+void testModel();
 void testScene();
 void testShaderResource();
+

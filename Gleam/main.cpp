@@ -9,6 +9,8 @@ int main() {
 	testTransform();
 	testTexture();
 	testScene();
+	testMeshLoader();
+	testModel();
 
 	return 0;
 }
