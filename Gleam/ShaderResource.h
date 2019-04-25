@@ -45,7 +45,7 @@ union UniformType {
 };
 
 struct GleamUniform {
-	~GleamUniform() {
+	void removeData() {
 		if (type > GleamType::UNSIGNED) {
 			delete data.void_value;
 		}
@@ -59,6 +59,8 @@ protected:
 	std::unordered_map<std::string, GleamUniform> _uniformTable;
 
 public:
+	~ShaderResource();
+
 	std::unordered_map<std::string, GleamUniform>::const_iterator begin();
 	std::unordered_map<std::string, GleamUniform>::const_iterator end();
 

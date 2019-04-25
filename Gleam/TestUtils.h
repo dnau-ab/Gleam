@@ -13,6 +13,7 @@
 #include "Viewport.h"
 #include "Transform.h"
 #include "Scene.h"
+#include "ShaderResource.h"
 
 #include "DirectionalLight.h"
 #include "PointLight.h"
@@ -34,3 +35,4 @@ void testWindow();
 void testTransform();
 void testTexture();
 void testScene();
+void testShaderResource();

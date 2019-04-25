@@ -1,5 +1,11 @@
 #include "ShaderResource.h"
 
+ShaderResource::~ShaderResource() {
+	for (auto itr = _uniformTable.begin(); itr != _uniformTable.end(); itr++) {
+		itr->second.removeData();
+	}
+}
+
 std::unordered_map<std::string, GleamUniform>::const_iterator ShaderResource::begin() {
 	return _uniformTable.cbegin();
 }
@@ -8,6 +14,7 @@ std::unordered_map<std::string, GleamUniform>::const_iterator ShaderResource::en
 }
 
 void ShaderResource::remove(const std::string& name) {
+	_uniformTable[name].removeData();
 	_uniformTable.erase(name);
 }
 
