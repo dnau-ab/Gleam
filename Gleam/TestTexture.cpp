@@ -5,6 +5,7 @@ void testTexture() {
 	assert(Texture::getDefaultID() != -1);
 
 	// create texture objects
+	Texture noTex("res/doesNotExist.png", "diffuse");
 	Texture diffuseTex("res/texture_diffuse.png", "diffuse");
 	Texture specularTex("res/texture_specular.png", "specular");
 

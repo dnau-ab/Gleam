@@ -52,14 +52,14 @@ void Texture::load(const std::string& path, const std::string& type) {
 
 		// get rid of image data since it is bound
 		stbi_image_free(data);
+
+		// add this texture to the collection of loaded textures
+		loaded.push_back(*this);
 	}
 	else {
-		//std::cout << "ERROR::TEXTURE::LOAD::Texture failed to load at path: " << path << std::endl;
+		std::cout << "ERROR::TEXTURE::LOAD::Texture failed to load at path: " << path << std::endl;
 		stbi_image_free(data);
 	}
-
-	// add this texture to the collection of loaded textures
-	loaded.push_back(*this);
 }
 
 Texture::Texture(const std::string& path, const std::string& type) {

@@ -2,9 +2,6 @@
 
 bool Window::_backendReady = false;
 
-glm::vec2 Window::_size;
-glm::vec2 Window::_scale;
-
 std::vector<Window*> Window::_windows;
 
 void Window::keyCallSwitch(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -40,9 +37,19 @@ void Window::scrollCallSwitch(GLFWwindow* window, double xOffset, double yOffset
 	}
 }
 
-void Window::framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-	_scale.x = width / _size.x;
-	_scale.y = height / _size.y;
+void Window::framebufferSizeSwitch(GLFWwindow* window, int width, int height) {
+	for (size_t i = 0; i < _windows.size(); i++) {
+		if (window == _windows[i]->_window) {
+			// always update window scale
+			_windows[i]->_scale.x = width / _windows[i]->_size.x;
+			_windows[i]->_scale.y = height / _windows[i]->_size.y;
+			// call callback if it exists
+			if (_windows[i]->framebufferSizeCallback != nullptr) {
+				_windows[i]->framebufferSizeCallback(_windows[i], width, height);
+				break;
+			}
+		}
+	}
 }
 
 void Window::initBackend() {
@@ -73,7 +80,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 		glfwMakeContextCurrent(_window);
 
 		// set callbacks
-		glfwSetFramebufferSizeCallback(_window, framebufferSizeCallback);
+		glfwSetFramebufferSizeCallback(_window, framebufferSizeSwitch);
 		glfwSetKeyCallback(_window, keyCallSwitch);
 		glfwSetCursorPosCallback(_window, mouseCallSwitch);
 		glfwSetScrollCallback(_window, scrollCallSwitch);
@@ -90,7 +97,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 		glEnable(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		framebufferSizeCallback(_window, _size.x, _size.y);
+		framebufferSizeSwitch(_window, _size.x, _size.y);
 		Window::_windows.push_back(this);
 	}
 }

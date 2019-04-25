@@ -14,9 +14,6 @@
 
 class Window {
 private:
-	static glm::vec2 _size;
-	static glm::vec2 _scale;
-
 	static std::vector<Window*> _windows;
 	
 	static bool _backendReady;
@@ -25,9 +22,13 @@ private:
 	static void keyCallSwitch(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void mouseCallSwitch(GLFWwindow* window, double xPos, double yPos);
 	static void scrollCallSwitch(GLFWwindow* window, double xOffset, double yOffset);
-	static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+	static void framebufferSizeSwitch(GLFWwindow* window, int width, int height);
 
+protected:
 	std::string _title;
+	glm::vec<2, unsigned> _size;
+	glm::vec2 _scale;
+
 	GLFWwindow* _window;
 	std::vector<Viewport*> _viewports;
 	double _deltaTime;
@@ -37,10 +38,12 @@ public:
 	typedef void(*KeyCallback)(Window* window, int key, int scancode, int action, int mods);
 	typedef void(*MouseCallback)(Window* window, double xPos, double yPos);
 	typedef void(*ScrollCallback)(Window* window, double xOffset, double yOffset);
+	typedef void (*FramebufferSizeCallback)(Window* window, int width, int height);
 
 	KeyCallback keyCallback = nullptr;
 	MouseCallback mouseCallback = nullptr;
 	ScrollCallback scrollCallback = nullptr;
+	FramebufferSizeCallback framebufferSizeCallback = nullptr;
 
 	Window(std::string title, unsigned int width, unsigned int height);
 

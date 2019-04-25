@@ -30,5 +30,5 @@ void _print(glm::quat q) {
 
 
 bool _approxEqual(double a, double b) {
-	return (std::abs(a - b) < 0.01);
+	return (std::abs(a - b) < 0.05);
 }
