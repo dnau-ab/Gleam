@@ -22,8 +22,8 @@
 
 class Viewport {
 private:
-	glm::vec2 _position;
-	glm::vec2 _size;
+	glm::vec<2, int> _position;
+	glm::vec<2, unsigned> _size;
 
 public:
 	Scene* scene = nullptr;

@@ -41,8 +41,8 @@ void Window::framebufferSizeSwitch(GLFWwindow* window, int width, int height) {
 	for (size_t i = 0; i < _windows.size(); i++) {
 		if (window == _windows[i]->_window) {
 			// always update window scale
-			_windows[i]->_scale.x = width / _windows[i]->_size.x;
-			_windows[i]->_scale.y = height / _windows[i]->_size.y;
+			_windows[i]->_scale.x = (float)width / _windows[i]->_size.x;
+			_windows[i]->_scale.y = (float)height / _windows[i]->_size.y;
 			// call callback if it exists
 			if (_windows[i]->framebufferSizeCallback != nullptr) {
 				_windows[i]->framebufferSizeCallback(_windows[i], width, height);
@@ -84,7 +84,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 		glfwSetKeyCallback(_window, keyCallSwitch);
 		glfwSetCursorPosCallback(_window, mouseCallSwitch);
 		glfwSetScrollCallback(_window, scrollCallSwitch);
-		glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		//glfwSetInputMode(_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		// initialize GLAD
 		// load all OpenGL function pointers
@@ -102,6 +102,10 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 	}
 }
 
+Window::~Window() {
+	close();
+}
+
 void Window::addViewport(Viewport* viewport) {
 	if (viewport != nullptr) {
 		_viewports.push_back(viewport);
@@ -116,11 +120,15 @@ void Window::removeViewport(Viewport* viewport) {
 }
 
 bool Window::shouldClose() {
-	return glfwWindowShouldClose(_window);
+	return (_window ? glfwWindowShouldClose(_window) : true);
 }
 
 void Window::close() {
-	glfwSetWindowShouldClose(_window, true);
+	if (_window != nullptr) {
+		glfwSetWindowShouldClose(_window, GLFW_TRUE);
+		glfwDestroyWindow(_window);
+		_window = nullptr;
+	}
 }
 
 double Window::getDeltaTime() {
@@ -147,14 +155,14 @@ void Window::update() {
 		//processInput(window);
 
 		// render
-		glm::vec2 vpPos;
-		glm::vec2 vpSize;
+		glm::vec<2, int> vpPos;
+		glm::vec<2, unsigned> vpSize;
 		for (Viewport*& viewport : _viewports) {
 			vpPos = viewport->getPosition() * _scale;
 			vpSize = viewport->getSize() * _scale;
 			glViewport(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
 			glScissor(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
-			glClearColor(0.3, 0.3, 0.31, 1.0);
+			glClearColor(0.3f, 0.3f, 0.31f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 			viewport->render();

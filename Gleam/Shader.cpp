@@ -62,7 +62,7 @@ void Shader::use() {
 
 Shader* Shader::getDefault() {
 	if (_defaultShader == nullptr) {
-		_defaultShader = new Shader("gleam_default_shader.vert", "gleam_default_shader.frag");
+		_defaultShader = new Shader("res/shaders/gleam_default_shader.vert", "res/shaders/gleam_default_shader.frag");
 	}
 	return _defaultShader;
 }

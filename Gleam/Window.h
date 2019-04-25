@@ -46,6 +46,7 @@ public:
 	FramebufferSizeCallback framebufferSizeCallback = nullptr;
 
 	Window(std::string title, unsigned int width, unsigned int height);
+	~Window();
 
 	void addViewport(Viewport* viewport);
 	void removeViewport(Viewport* viewport);
