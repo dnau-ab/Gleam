@@ -6,10 +6,21 @@ void Mesh::addLoadedMesh(std::weak_ptr<Mesh> mesh) {
 	_loaded.push_back(mesh);
 }
 
-Mesh::Mesh(const std::vector<SubMesh>& meshes) {
+Mesh::Mesh(const std::vector<SubMesh>& meshes)
+	: _meshes(meshes) {
 
 }
 
-void Mesh::render(Shader* shader) {
+SubMesh* Mesh::getSubMesh(unsigned index) {
+	if (index >= _meshes.size()) {
+		return nullptr;
+	}
+	return &_meshes[index];
+}
 
+void Mesh::render(Shader* shader) {
+	// render all submeshes
+	for (SubMesh& mesh : _meshes) {
+		mesh.render(shader);
+	}
 }
