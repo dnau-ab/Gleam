@@ -34,7 +34,7 @@ public:
 	void setUnsigned(const std::string& name, unsigned value) const;
 
 	void setVec2(const std::string& name, const glm::vec<2, bool>& value) const;
-	void setVec2(const std::string& name, float v1, bool v2) const;
+	void setVec2(const std::string& name, bool v1, bool v2) const;
 	void setVec3(const std::string& name, const glm::vec<3, bool>& value) const;
 	void setVec3(const std::string& name, bool v1, bool v2, bool v3) const;
 	void setVec4(const std::string& name, const glm::vec<4, bool>& value) const;
