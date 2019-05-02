@@ -20,5 +20,5 @@ public:
 	Model(std::shared_ptr<Mesh> mesh, Shader* shader);
 	Model(std::shared_ptr<Mesh> mesh);
 
-	void render(const Camera& camera) override;
+	void render(const Camera* camera) override;
 };

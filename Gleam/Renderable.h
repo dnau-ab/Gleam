@@ -15,5 +15,5 @@ public:
 	glm::mat3 getNormalMatrix() const;
 	void setResource(ShaderResource& resource);
 
-	virtual void render(const Camera& camera) = 0;
+	virtual void render(const Camera* camera) = 0;
 };

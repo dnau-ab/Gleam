@@ -9,5 +9,7 @@ glm::vec2 Viewport::getSize() {
 }
 
 void Viewport::render() {
-
+	for (Renderable* &renderable : scene->getRenderables()) {
+		renderable->render(camera);
+	}
 }

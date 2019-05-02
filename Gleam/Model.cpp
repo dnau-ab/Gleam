@@ -34,7 +34,7 @@ Model::Model(std::shared_ptr<Mesh> mesh) {
 	_shader = Shader::getDefault();
 }
 
-void Model::render(const Camera& camera) {
+void Model::render(const Camera* camera) {
 	if (_mesh != nullptr) {
 		_mesh->render(_shader);
 	}

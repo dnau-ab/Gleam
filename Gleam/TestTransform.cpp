@@ -1,11 +1,12 @@
 #include "TestUtils.h"
 
 void testTransform() {
+	// Test all constructors
 	Transform t1;
 	Transform t2(glm::vec3(10.0f, -10.0f, 0.0f));
 	Transform t3(glm::vec3(0.0f, 0.0f, 100.0f), glm::quat(glm::vec3(0.3, 0.2f, 0.0f)));
 	Transform t4(glm::vec3(100.0f, 0.0f, 0.0f), glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)), glm::vec3(1.0f, 3.0f, 1.0f));
-
+	// Make sure the transformatiom matrix represents each constructed object
 	cout << "T1: ";
 	_print(t1.getTransformationMatrix());
 	cout << "T2: ";
@@ -14,14 +15,14 @@ void testTransform() {
 	_print(t3.getTransformationMatrix());
 	cout << "T4: ";
 	_print(t4.getTransformationMatrix());
-
+	// Test rotations
 	t1.rotate(glm::vec3(90.0f, 0.0f, 0.0f));
 	cout << "T1 rot 90 x: ";
 	_print(t1.getTransformationMatrix());
 	t1.scale(glm::vec3(1.0f, 2.0f, 3.0f));
 	cout << "T1 scale 1,2,3 : ";
 	_print(t1.getTransformationMatrix());
-
+	// ...
 	cout << "\nP, R(Q), R(E), S:\n";
 	_print(t1.getPosition());
 	_print(t1.getRotation());
