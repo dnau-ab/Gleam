@@ -97,8 +97,8 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 		glEnable(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		framebufferSizeSwitch(_window, _size.x, _size.y);
 		Window::_windows.push_back(this);
+		framebufferSizeSwitch(_window, _size.x, _size.y);
 	}
 }
 

@@ -29,8 +29,11 @@ public:
 	Scene* scene = nullptr;
 	Camera* camera = nullptr;
 
-	Viewport(int x, int y, unsigned width, unsigned height);
-	Viewport(glm::vec2 pos, glm::vec2 size);
+	Viewport(int x, int y, unsigned width, unsigned height)
+		: _position(glm::vec<2, int>(x, y)), _size(glm::vec<2, unsigned>(width, height)) {}
+
+	Viewport(glm::vec2 pos, glm::vec2 size)
+		: _position(pos), _size(size) {}
 
 	glm::vec2 getPosition();
 	glm::vec2 getSize();
