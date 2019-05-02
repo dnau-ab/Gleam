@@ -42,8 +42,8 @@ int main() {
 	Window window("Hello World!", WIDTH, HEIGHT);
 	Shader* shader = Shader::getDefault();
 	Scene scene;
-	unsigned radius = 5;
-	unsigned numSami = 2;
+	unsigned radius = 10;
+	unsigned numSami = 10;
 	for (int i = 0; i < numSami; i++) {
 		Model* varia = new Model("res/models/variasuit/DolBarriersuit.obj", shader);
 		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));

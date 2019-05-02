@@ -1,20 +1,23 @@
 #include "MeshLoader.h"
 
 std::shared_ptr<Mesh> MeshLoader::loadMesh(const std::string& directory, const std::string& fileName, const bool loadTextures) {
-	std::cout << "LOADER::Loading " << fileName << " from " << directory << std::endl;
-	Assimp::Importer importer;
-	std::string path = directory == "" ? fileName : (directory + "/" + fileName);
-	const aiScene* scene = importer.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+	std::string meshPath = directory + "/" + fileName;
+	std::shared_ptr<Mesh> mesh = Mesh::getLoaded(meshPath);
+	if (mesh == nullptr) {
+		std::cout << "LOADER::Loading " << fileName << " from " << directory << std::endl;
+		Assimp::Importer importer;
+		std::string path = directory == "" ? fileName : (directory + "/" + fileName);
+		const aiScene* scene = importer.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
-	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-		std::cout << "ERROR::LOADER::LOAD OBJECT::ASSIMP::" << importer.GetErrorString() << std::endl;
-		return nullptr;
+		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+			std::cout << "ERROR::LOADER::LOAD OBJECT::ASSIMP::" << importer.GetErrorString() << std::endl;
+			return nullptr;
+		}
+
+		mesh = std::make_shared<Mesh>(Mesh(processNode(scene->mRootNode, scene, directory, loadTextures), meshPath));
+		Mesh::addLoadedMesh(std::weak_ptr<Mesh>(mesh));
 	}
-
-	auto sp = std::make_shared<Mesh>(Mesh(processNode(scene->mRootNode, scene, directory, loadTextures)));
-	Mesh::addLoadedMesh(std::weak_ptr<Mesh>(sp));
-
-	return sp;
+	return mesh;
 }
 
 std::vector<SubMesh> MeshLoader::processNode(aiNode* node, const aiScene* scene, const std::string& directory, const bool loadTextures) {
