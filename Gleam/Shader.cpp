@@ -57,7 +57,6 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 
 void Shader::use() {
 	glUseProgram(_ID);
-	
 }
 
 Shader* Shader::getDefault() {

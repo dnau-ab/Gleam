@@ -1,9 +1,11 @@
 
-#include "TestUtils.h"
+//#define TESTING
+
+#ifdef TESTING
+	#include "TestUtils.h"
+#endif
 #include "Window.h"
 #include "CameraFPS.h"
-
-//#define TESTING
 
 int main() {
 #ifdef TESTING
@@ -34,23 +36,27 @@ int main() {
 	}
 	*/
 #endif
-	Window window("Hello World!", 800, 600);
+	const unsigned WIDTH = 800;
+	const unsigned HEIGHT = 600;
+
+	Window window("Hello World!", WIDTH, HEIGHT);
 	Shader* shader = Shader::getDefault();
 	Scene scene;
-	for (int i = 0; i < 16; i++) {
+	unsigned radius = 5;
+	unsigned numSami = 2;
+	for (int i = 0; i < numSami; i++) {
 		Model* varia = new Model("res/models/variasuit/DolBarriersuit.obj", shader);
-		varia->transform.translate(glm::vec3(cos(i * (360.0f / 16.0f)), 0.0f, sin(i * (360.0f / 16.0f))));
+		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));
 		scene.addRenderable(varia);
 	}
-	CameraFPS camera(glm::vec3(0.0f, 0.0f, 0.0f));
-	Viewport view(0, 0, 800, 600);
+	CameraFPS camera(glm::vec3(0.0f, 5.0f, 32.0f));
+	Viewport view(0, 0, WIDTH, HEIGHT);
 	view.scene = &scene;
 	view.camera = &camera;
 
 	window.addViewport(&view);
 
 	while (!window.shouldClose()) {
-		camera.transform.rotate(glm::vec3(window.getDeltaTime() * 30.0f, 0.0f, 0.0f));
 		window.update();
 	}
 	window.close();

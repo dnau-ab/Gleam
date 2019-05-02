@@ -25,10 +25,12 @@ class Camera {
 private:
 	virtual void updateCameraVectors() = 0;
 protected:
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f))
-		: transform(position, worldUp), worldUp(worldUp) {}
-	Camera(float posX, float posY, float posZ, float worldUpX, float worldUpY, float worldUpZ)
-		: transform(glm::vec3(posX, posY, posZ)), worldUp(glm::vec3(worldUpX, worldUpY, worldUpZ)) {}
+	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f))
+		: transform(position, rotation), worldUp(worldUp), up(worldUp), front(0.0f, 0.0f, -1.0f) {}
+	Camera(float posX, float posY, float posZ, 
+		float rotX, float rotY, float rotZ,
+		float worldUpX, float worldUpY, float worldUpZ)
+		: transform(glm::vec3(posX, posY, posZ), glm::vec3(rotX, rotY, rotZ)), worldUp(worldUpX, worldUpY, worldUpZ), up(worldUpX, worldUpY, worldUpZ), front(0.0f, 0.0f, -1.0f) {}
 public:
 	Transform transform;
 	glm::vec3 front;

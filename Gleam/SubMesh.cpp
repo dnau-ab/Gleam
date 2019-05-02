@@ -30,12 +30,12 @@ void SubMesh::init() {
 
 SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<Texture>& textures) 
 	: _vertices(vertices), _indices(indices), material(textures) {
-
+	init();
 }
 
 SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const Material& material)
 	: _vertices(vertices), _indices(indices), material(material) {
-
+	init();
 }
 
 void SubMesh::render(Shader* shader) {

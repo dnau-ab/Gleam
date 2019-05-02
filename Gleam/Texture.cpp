@@ -41,6 +41,7 @@ void Texture::load(const std::string& path, const std::string& type) {
 		}
 
 		// bind texture and its data
+		glGenTextures(1, &_id);
 		glBindTexture(GL_TEXTURE_2D, _id);
 		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 		// setup texture mipmapping

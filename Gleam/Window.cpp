@@ -95,7 +95,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_SCISSOR_TEST);
 		glEnable(GL_STENCIL_TEST);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 		Window::_windows.push_back(this);
 		framebufferSizeSwitch(_window, _size.x, _size.y);
@@ -150,9 +150,6 @@ void Window::update() {
 			numFrames = 0;
 			lastTime += 1.0;
 		}
-
-		// input
-		//processInput(window);
 
 		// render
 		glm::vec<2, int> vpPos;

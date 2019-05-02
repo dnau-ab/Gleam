@@ -83,19 +83,19 @@ SubMesh MeshLoader::processMesh(aiMesh* mesh, const aiScene* scene, const std::s
 
 		if (loadTextures) {
 			// load diffuse maps
-			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory);
+			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", directory);
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 			// load specular maps
-			std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", directory);
+			std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular", directory);
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 			// load normal maps
-			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal", directory);
+			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, "normal", directory);
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 			// load ambient maps
-			std::vector<Texture> ambientMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_ambient", directory);
+			std::vector<Texture> ambientMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "ambient", directory);
 			textures.insert(textures.end(), ambientMaps.begin(), ambientMaps.end());
 			// load height maps
-			std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height", directory);
+			std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "height", directory);
 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 			meshMaterial.setTextures(textures);
