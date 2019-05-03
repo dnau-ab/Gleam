@@ -30,13 +30,19 @@ public:
 	Camera* camera = nullptr;
 
 	Viewport(int x, int y, unsigned width, unsigned height)
-		: _position(glm::vec<2, int>(x, y)), _size(glm::vec<2, unsigned>(width, height)) {}
+		: _position(glm::vec<2, int>(x, y)), _size(glm::vec<2, unsigned>(width, height)) {
+	}
 
 	Viewport(glm::vec2 pos, glm::vec2 size)
-		: _position(pos), _size(size) {}
+		: _position(pos), _size(size) {
+	}
 
 	glm::vec2 getPosition();
 	glm::vec2 getSize();
 
-	void render();
+	void setPosition(glm::vec<2, int> position);
+	void setSize(glm::vec<2, unsigned> size);
+
+	void renderGeometry();
+	void renderLighting();
 };

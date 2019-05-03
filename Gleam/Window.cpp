@@ -63,6 +63,52 @@ void Window::initBackend() {
 #endif
 }
 
+void Window::initGBuffer() {
+	glGenFramebuffers(1, &_gBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
+
+	// position color buffer
+	glGenTextures(1, &_gPosition);
+	glBindTexture(GL_TEXTURE_2D, _gPosition);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, _size.x, _size.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
+
+	// normal color buffer
+	glGenTextures(1, &_gNormal);
+	glBindTexture(GL_TEXTURE_2D, _gNormal);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, _size.x, _size.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal, 0);
+
+	// color + specular color buffer
+	glGenTextures(1, &_gColorSpec);
+	glBindTexture(GL_TEXTURE_2D, _gColorSpec);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _size.x, _size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gColorSpec, 0);
+
+	// add attachments to framebuffer 
+	unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers(3, attachments);
+
+	// create and attach depth buffer
+	unsigned int rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _size.x, _size.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+	// check that framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "VIEWPORT::Framebuffer not complete!" << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 Window::Window(std::string title, unsigned int width, unsigned int height) {
 	_size.x = width;
 	_size.y = height;
@@ -98,8 +144,10 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 		glEnable(GL_STENCIL_TEST);
 		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		Window::_windows.push_back(this);
 		framebufferSizeSwitch(_window, _size.x, _size.y);
+		initGBuffer();
+
+		Window::_windows.push_back(this);
 	}
 }
 
@@ -153,18 +201,51 @@ void Window::update() {
 		}
 
 		// render
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		glm::vec<2, int> vpPos;
 		glm::vec<2, unsigned> vpSize;
+		// geometry pass
 		for (Viewport*& viewport : _viewports) {
 			vpPos = viewport->getPosition() * _scale;
 			vpSize = viewport->getSize() * _scale;
 			glViewport(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
 			glScissor(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
-			glClearColor(0.3f, 0.3f, 0.31f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-			viewport->render();
+			viewport->renderGeometry();
 		}
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		/*
+		// lighting pass
+		for (Viewport*& viewport : _viewports) {
+			vpPos = viewport->getPosition() * _scale;
+			vpSize = viewport->getSize() * _scale;
+			glViewport(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
+			glScissor(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			//lightingPassShader.use();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _gPosition);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, _gNormal);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, _gColorSpec);
+			viewport->renderLighting();
+		}
+		*/
+
+		// copy geometry's depth buffer to default framebuffer's depth buffer
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
+		// write to default framebuffer
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		// blit to default framebuffer
+		glBlitFramebuffer(0, 0, _size.x * _scale.x, _size.y * _scale.y, 0, 0, _size.x * _scale.x, _size.y * _scale.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// forward rendered lights here vvv
 
 		glfwPollEvents();
 		if (_window != nullptr) {

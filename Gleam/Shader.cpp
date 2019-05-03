@@ -39,7 +39,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 	glCompileShader(vertex);
 	checkCompileErrors(vertex, "VERTEX");
 
-	fragment = glCreateShader(GL_FRAGMENT_SHADER);;
+	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment, 1, &fCode, NULL);
 	glCompileShader(fragment);
 	checkCompileErrors(fragment, "FRAGMENT");
@@ -61,7 +61,7 @@ void Shader::use() {
 
 Shader* Shader::getDefault() {
 	if (_defaultShader == nullptr) {
-		_defaultShader = new Shader("res/shaders/gleam_default_shader.vert", "res/shaders/gleam_default_shader.frag");
+		_defaultShader = new Shader("res/shaders/gleam_default_shader_def.vert", "res/shaders/gleam_default_shader_def.frag");
 	}
 	return _defaultShader;
 }

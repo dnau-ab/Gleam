@@ -24,6 +24,13 @@ private:
 	static void scrollCallSwitch(GLFWwindow* window, double xOffset, double yOffset);
 	static void framebufferSizeSwitch(GLFWwindow* window, int width, int height);
 
+	unsigned int _gBuffer;
+	unsigned int _gPosition;
+	unsigned int _gNormal;
+	unsigned int _gColorSpec;
+
+	void initGBuffer();
+
 protected:
 	std::string _title;
 	glm::vec<2, unsigned> _size;
