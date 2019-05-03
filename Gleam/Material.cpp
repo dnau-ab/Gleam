@@ -48,15 +48,7 @@ void Material::bind(Shader* shader) {
 	unsigned normalNum = 1;
 	unsigned heightNum = 1;
 	std::string number;
-	// reset textures
-	for (size_t i = 0; i < 4; i++) {
-		number = std::to_string(i+1);
-		shader->setInt(("material.diffuse" + number).c_str(), -1);
-		shader->setInt(("material.specular" + number).c_str(), -1);
-		shader->setInt(("material.normal" + number).c_str(), -1);
-		shader->setInt(("material.height" + number).c_str(), -1);
-	}
-	
+
 	for (size_t i = 0; i < _textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 

@@ -203,12 +203,13 @@ void Window::update() {
 		// render
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// geometry pass
 		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::vec<2, int> vpPos;
 		glm::vec<2, unsigned> vpSize;
-		// geometry pass
 		for (Viewport*& viewport : _viewports) {
 			vpPos = viewport->getPosition() * _scale;
 			vpSize = viewport->getSize() * _scale;
