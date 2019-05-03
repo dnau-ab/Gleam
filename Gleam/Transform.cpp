@@ -41,7 +41,7 @@ glm::vec3 Transform::getPosition() const {
 }
 
 glm::vec3 Transform::toEuler() const {
-	return glm::eulerAngles(_rotation);
+	return glm::degrees(glm::eulerAngles(_rotation));
 }
 
 glm::quat Transform::getRotation() const {

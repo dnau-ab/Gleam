@@ -5,6 +5,7 @@ bool Window::_backendReady = false;
 std::vector<Window*> Window::_windows;
 
 void Window::keyCallSwitch(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	//std::cout << "Meta-key handler called!" << std::endl;
 	for (size_t i = 0; i < _windows.size(); i++) {
 		if (window == _windows[i]->_window) {
 			if (_windows[i]->keyCallback != nullptr) {
@@ -168,4 +169,13 @@ void Window::update() {
 		glfwPollEvents();
 		glfwSwapBuffers(_window);
 	}
+}
+
+/*
+	GLFW_CURSOR_DISABLED
+	GLFW_CURSOR_NORMAL
+	GLFW_CURSOR_HIDDEN
+*/
+void Window::setCursorMode(int type) {
+	glfwSetInputMode(_window, GLFW_CURSOR, type);
 }

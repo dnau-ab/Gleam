@@ -50,6 +50,7 @@ public:
 
 	void addViewport(Viewport* viewport);
 	void removeViewport(Viewport* viewport);
+	void setCursorMode(int type);
 
 	bool shouldClose();
 	void close();

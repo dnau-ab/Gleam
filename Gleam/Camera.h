@@ -13,12 +13,13 @@
 #include "Transform.h"
 
 enum Camera_Movement {
-	FORWARD,
-	BACKWARD,
-	LEFT,
-	RIGHT,
-	UP,
-	DOWN
+	NONE = 0,
+	FORWARD = 1,
+	BACKWARD = 2,
+	LEFT = 4,
+	RIGHT = 8,
+	UP = 16,
+	DOWN = 32
 };
 
 class Camera {

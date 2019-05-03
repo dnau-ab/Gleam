@@ -3,7 +3,7 @@
 
 class CameraFPS : public Camera{
 private:
-	static constexpr float SPEED = 2.5f;
+	static constexpr float SPEED = 12.5f;
 	static constexpr float SENSITIVITY = 0.1f;
 	static constexpr float ZOOM = 45.0f;
 
@@ -26,9 +26,9 @@ public:
 	glm::mat4 getViewMatrix() override;
 	glm::mat4 getProjectionMatrix(float aspectRatio, float nearPlane, float farPlane) override;
 
-	void ProcessKeyboard(Camera_Movement direction, float deltaTime);
-	void ProcessMouseMovement(float xoffset, float yoffset);
-	void ProcessMouseScroll(float yoffset);
+	void processKeyboard(Camera_Movement direction, float deltaTime);
+	void processMouseMovement(float xoffset, float yoffset);
+	void processMouseScroll(float yoffset);
 	
 	// Camera options
 	float movementSpeed;
