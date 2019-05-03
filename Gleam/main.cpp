@@ -161,7 +161,7 @@ void mouseHandler(Window* window, double xPos, double yPos) {
 
 	if (!cameraEnabled) return;
 	printf("X: %f\nY: %f\n\n", xPos - lastX, yPos - lastY);
-	camera.processMouseMovement(xPos - lastX, yPos - lastY);
+	camera.processMouseMovement(xPos - lastX, lastY - yPos);
 
 	lastX = xPos;
 	lastY = yPos;

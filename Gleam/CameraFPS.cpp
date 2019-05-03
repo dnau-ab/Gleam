@@ -42,14 +42,14 @@ void CameraFPS::processMouseMovement(float xoffset, float yoffset)
 	transform.rotate(glm::vec3(xoffset, yoffset, 0.0f));
 
 	// Make sure that when pitch is out of bounds, screen doesn't get flipped
-	/*
+	
 	glm::vec3 euler = transform.toEuler();
 	euler.x = glm::mod(euler.x, 360.0f);
 	if (euler.y > 89.0f)
 		transform.setRotation(glm::vec3(euler.x, 89.0f, euler.z));
 	if (euler.y < -89.0f)
 		transform.setRotation(glm::vec3(euler.x, -89.0f, euler.z));
-	*/
+	
 	// Update Front, Right and Up Vectors using the updated Euler angles
 	updateCameraVectors();
 }

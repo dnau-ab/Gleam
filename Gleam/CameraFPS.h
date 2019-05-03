@@ -15,13 +15,13 @@ public:
 		glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f), 
 		float movementSpeed = SPEED, float sensitivity = SENSITIVITY, float zoom = ZOOM)
-		: Camera(position, rotation, worldUp), movementSpeed(movementSpeed), mouseSensitivity(mouseSensitivity), zoom(zoom) {}
+		: Camera(position, rotation, worldUp), movementSpeed(movementSpeed), mouseSensitivity(sensitivity), zoom(zoom) {}
 	
 	CameraFPS(float posX, float posY, float posZ, 
 		float rotX, float rotY, float rotZ,
 		float worldUpX, float worldUpY, float worldUpZ, 
 		float movementSpeed = SPEED, float sensitivity = SENSITIVITY, float zoom = ZOOM)
-		: Camera(posX, posY, posZ, rotX, rotY, rotZ, worldUpX, worldUpY, worldUpZ), movementSpeed(movementSpeed), mouseSensitivity(mouseSensitivity), zoom(zoom) {}
+		: Camera(posX, posY, posZ, rotX, rotY, rotZ, worldUpX, worldUpY, worldUpZ), movementSpeed(movementSpeed), mouseSensitivity(sensitivity), zoom(zoom) {}
 	
 	glm::mat4 getViewMatrix() override;
 	glm::mat4 getProjectionMatrix(float aspectRatio, float nearPlane, float farPlane) override;

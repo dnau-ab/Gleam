@@ -167,7 +167,9 @@ void Window::update() {
 		}
 
 		glfwPollEvents();
-		glfwSwapBuffers(_window);
+		if (_window != nullptr) {
+			glfwSwapBuffers(_window);
+		}
 	}
 }
 
