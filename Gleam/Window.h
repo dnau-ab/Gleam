@@ -11,6 +11,7 @@
 
 #include "Texture.h"
 #include "Viewport.h"
+#include "Quad.h"
 
 class Window {
 private:
@@ -24,10 +25,12 @@ private:
 	static void scrollCallSwitch(GLFWwindow* window, double xOffset, double yOffset);
 	static void framebufferSizeSwitch(GLFWwindow* window, int width, int height);
 
-	unsigned int _gBuffer;
-	unsigned int _gPosition;
-	unsigned int _gNormal;
-	unsigned int _gColorSpec;
+	unsigned int _gBuffer = 0;
+	unsigned int _gPosition = 0;
+	unsigned int _gNormal = 0;
+	unsigned int _gColorSpec = 0;
+
+	std::unique_ptr<Quad> _screenQuad = nullptr;
 
 	void initGBuffer();
 

@@ -24,17 +24,18 @@ class Viewport {
 private:
 	glm::vec<2, int> _position;
 	glm::vec<2, unsigned> _size;
+	Shader _lightingShader;
 
 public:
 	Scene* scene = nullptr;
 	Camera* camera = nullptr;
 
 	Viewport(int x, int y, unsigned width, unsigned height)
-		: _position(glm::vec<2, int>(x, y)), _size(glm::vec<2, unsigned>(width, height)) {
+		: _position(glm::vec<2, int>(x, y)), _size(glm::vec<2, unsigned>(width, height)), _lightingShader("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/gleam_default_shader_def_lighting.frag") {
 	}
 
 	Viewport(glm::vec2 pos, glm::vec2 size)
-		: _position(pos), _size(size) {
+		: _position(pos), _size(size), _lightingShader("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/gleam_default_shader_def_lighting.frag") {
 	}
 
 	glm::vec2 getPosition();

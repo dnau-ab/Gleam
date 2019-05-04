@@ -22,5 +22,5 @@ void main() {
 	gPosition = fragPos;
 	gNormal = normalize(normal);
 	gColorSpec.rgb = texture(material.diffuse1, texCoord).rgb;
-	gColorSpec.a = texture(material.specular1, texCoord).r;
+	gColorSpec.a = 1.0f;//texture(material.specular1, texCoord).r;
 } 

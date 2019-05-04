@@ -19,7 +19,8 @@ void main()
 	normal = normalMat * aNormal;
 	texCoord = aTexCoord;
 
-	fragPos = vec3(model * vec4(aPos, 1.0));
+	vec4 worldPos = model * vec4(aPos, 1.0);
+	fragPos = worldPos.xyz;
 
-	gl_Position = projection * view * vec4(fragPos, 1.0f);
+	gl_Position = projection * view * worldPos;
 }

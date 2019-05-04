@@ -43,8 +43,8 @@ int main() {
 	}
 	*/
 #endif
-	const unsigned WIDTH = 800;
-	const unsigned HEIGHT = 600;
+	const unsigned WIDTH = 1024;
+	const unsigned HEIGHT = 720;
 
 	Window window("Hello World!", WIDTH, HEIGHT);
 	window.keyCallback = keyHandler;
@@ -53,7 +53,7 @@ int main() {
 	Shader* shader = Shader::getDefault();
 	Scene scene;
 	unsigned radius = 30;
-	unsigned numSami = 32;
+	unsigned numSami = 2;
 	for (int i = 0; i < numSami; i++) {
 		Model* varia = new Model("res/models/variasuit/DolBarriersuit.obj", shader);
 		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));
@@ -66,6 +66,9 @@ int main() {
 	view.camera = &camera;
 
 	window.addViewport(&view);
+
+	DirectionalLight dLight(glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(5, 5, 5));
+	scene.addLight(&dLight);
 
 	while (!window.shouldClose()) {
 		float deltaTime = window.getDeltaTime();
@@ -100,6 +103,15 @@ int main() {
 void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		switch (key) {
+		case GLFW_KEY_4:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // fill mode
+			break;
+		case GLFW_KEY_5:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
+			break;
+		case GLFW_KEY_6:
+			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // point mode
+			break;
 		case GLFW_KEY_W:
 			movement |= Camera_Movement::FORWARD;
 			break;

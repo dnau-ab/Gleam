@@ -44,6 +44,7 @@ void Window::framebufferSizeSwitch(GLFWwindow* window, int width, int height) {
 			// always update window scale
 			_windows[i]->_scale.x = (float)width / _windows[i]->_size.x;
 			_windows[i]->_scale.y = (float)height / _windows[i]->_size.y;
+			_windows[i]->initGBuffer(); // resize GBuffer
 			// call callback if it exists
 			if (_windows[i]->framebufferSizeCallback != nullptr) {
 				_windows[i]->framebufferSizeCallback(_windows[i], width, height);
@@ -64,13 +65,24 @@ void Window::initBackend() {
 }
 
 void Window::initGBuffer() {
+
+	if (_gBuffer > 0) {
+		// delete and recreate buffer/textures
+		glDeleteBuffers(1, &_gBuffer);
+		glDeleteTextures(1, &_gPosition);
+		glDeleteTextures(1, &_gNormal);
+		glDeleteTextures(1, &_gColorSpec);
+	}
+
+	glm::vec<2, unsigned> size = glm::vec2(_size) * _scale;
+
 	glGenFramebuffers(1, &_gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
 
 	// position color buffer
 	glGenTextures(1, &_gPosition);
 	glBindTexture(GL_TEXTURE_2D, _gPosition);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, _size.x, _size.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, size.x, size.y, 0, GL_RGB, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
@@ -78,7 +90,7 @@ void Window::initGBuffer() {
 	// normal color buffer
 	glGenTextures(1, &_gNormal);
 	glBindTexture(GL_TEXTURE_2D, _gNormal);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, _size.x, _size.y, 0, GL_RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, size.x, size.y, 0, GL_RGB, GL_FLOAT, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal, 0);
@@ -86,7 +98,7 @@ void Window::initGBuffer() {
 	// color + specular color buffer
 	glGenTextures(1, &_gColorSpec);
 	glBindTexture(GL_TEXTURE_2D, _gColorSpec);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _size.x, _size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gColorSpec, 0);
@@ -99,7 +111,7 @@ void Window::initGBuffer() {
 	unsigned int rboDepth;
 	glGenRenderbuffers(1, &rboDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, _size.x, _size.y);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 
 	// check that framebuffer is complete
@@ -109,7 +121,7 @@ void Window::initGBuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Window::Window(std::string title, unsigned int width, unsigned int height) {
+Window::Window(std::string title, unsigned int width, unsigned int height) : _scale(1.0f, 1.0f) {
 	_size.x = width;
 	_size.y = height;
 	_title = title;
@@ -144,10 +156,10 @@ Window::Window(std::string title, unsigned int width, unsigned int height) {
 		glEnable(GL_STENCIL_TEST);
 		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		framebufferSizeSwitch(_window, _size.x, _size.y);
-		initGBuffer();
+		_screenQuad = std::unique_ptr<Quad>(new Quad());
 
 		Window::_windows.push_back(this);
+		framebufferSizeSwitch(_window, _size.x, _size.y);
 	}
 }
 
@@ -218,40 +230,41 @@ void Window::update() {
 			viewport->renderGeometry();
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		/*
+		
 		// lighting pass
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//_viewports[0]->_lightingShader.use();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, _gPosition);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, _gNormal);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, _gColorSpec);
 		for (Viewport*& viewport : _viewports) {
 			vpPos = viewport->getPosition() * _scale;
 			vpSize = viewport->getSize() * _scale;
 			glViewport(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
 			glScissor(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
-
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			//lightingPassShader.use();
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, _gPosition);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, _gNormal);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, _gColorSpec);
 			viewport->renderLighting();
 		}
-		*/
+
+		// render quad
+		_screenQuad->render(glm::mat4(1.0f), glm::mat4(1.0f));
 
 		// copy geometry's depth buffer to default framebuffer's depth buffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
-		// write to default framebuffer
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 		// blit to default framebuffer
-		glBlitFramebuffer(0, 0, _size.x * _scale.x, _size.y * _scale.y, 0, 0, _size.x * _scale.x, _size.y * _scale.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glm::vec<2, unsigned> size = glm::vec2(_size) * _scale;
+		glBlitFramebuffer(0, 0, size.x, size.y, 0, 0, size.x, size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		// forward rendered lights here vvv
 
-		glfwPollEvents();
 		if (_window != nullptr) {
 			glfwSwapBuffers(_window);
 		}
+		glfwPollEvents();
 	}
 }
 
