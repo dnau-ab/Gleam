@@ -1,3 +1,4 @@
+#pragma once
 #include "Renderable.h"
 #include "SubMesh.h"
 
@@ -10,14 +11,15 @@ private:
 protected:
 
 public:
-	Quad(float width = 2.0f, float height = 2.0f, glm::vec3 center = glm::vec3(0.0f, 0.0f, 0.0f)) {
+	Quad() {
 		float quadVertices[] = {
-			// positions                                                     // texture Coords
-			-width / 2.0f + center.x / 2.0f,  height / 2.0f + center.y / 2.0f, center.z, 0.0f, 1.0f,
-			-width / 2.0f + center.x / 2.0f, -height / 2.0f + center.y / 2.0f, center.z, 0.0f, 0.0f,
-			 width / 2.0f + center.x / 2.0f,  height / 2.0f + center.y / 2.0f, center.z, 1.0f, 1.0f,
-			 width / 2.0f + center.x / 2.0f, -height / 2.0f + center.y / 2.0f, center.z, 1.0f, 0.0f,
+			// positions        // texture Coords
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 		};
+
 		// setup plane VAO
 		glGenVertexArrays(1, &_VAO);
 		glGenBuffers(1, &_VBO);
@@ -28,6 +30,11 @@ public:
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+
+	~Quad() {
+		glDeleteVertexArrays(1, &_VAO);
+		glDeleteBuffers(1, &_VBO);
 	}
 
 	void render(const glm::mat4& projection, const glm::mat4& view) override {

@@ -21,7 +21,7 @@
 #include <glm/glm.hpp>
 
 class Viewport {
-private:
+protected:
 	glm::vec<2, int> _position;
 	glm::vec<2, unsigned> _size;
 	Shader _lightingShader;
@@ -44,6 +44,7 @@ public:
 	void setPosition(glm::vec<2, int> position);
 	void setSize(glm::vec<2, unsigned> size);
 
+	void render();
 	void renderGeometry();
 	void renderLighting();
 };

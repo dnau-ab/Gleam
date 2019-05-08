@@ -156,7 +156,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height) : _sc
 		glEnable(GL_STENCIL_TEST);
 		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		_screenQuad = std::unique_ptr<Quad>(new Quad());
+		_screenQuad = std::make_unique<Quad>();
 
 		Window::_windows.push_back(this);
 		framebufferSizeSwitch(_window, _size.x, _size.y);
@@ -165,6 +165,13 @@ Window::Window(std::string title, unsigned int width, unsigned int height) : _sc
 
 Window::~Window() {
 	close();
+	if (_gBuffer > 0) {
+		// delete and recreate buffer/textures
+		glDeleteBuffers(1, &_gBuffer);
+		glDeleteTextures(1, &_gPosition);
+		glDeleteTextures(1, &_gNormal);
+		glDeleteTextures(1, &_gColorSpec);
+	}
 }
 
 void Window::addViewport(Viewport* viewport) {
@@ -188,6 +195,7 @@ void Window::close() {
 	if (_window != nullptr) {
 		glfwSetWindowShouldClose(_window, GLFW_TRUE);
 		glfwDestroyWindow(_window);
+		_windows.erase(std::find(_windows.begin(), _windows.end(), this));
 		_window = nullptr;
 	}
 }
@@ -200,7 +208,7 @@ void Window::update() {
 	static double lastTime = glfwGetTime();
 	static double lastCheck = glfwGetTime();
 	static int numFrames = 0;
-	if (!glfwWindowShouldClose(_window)) {
+	if (!shouldClose()) {
 		// calculate draw time
 		numFrames++;
 		_deltaTime = glfwGetTime() - lastCheck;
@@ -233,29 +241,25 @@ void Window::update() {
 		
 		// lighting pass
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		//_viewports[0]->_lightingShader.use();
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _gPosition);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, _gNormal);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, _gColorSpec);
+		glm::vec<2, unsigned> size = glm::vec2(_size) * _scale;
+		glViewport(0, 0, size.x, size.y);
+		glScissor(0, 0, size.x, size.y);
 		for (Viewport*& viewport : _viewports) {
-			vpPos = viewport->getPosition() * _scale;
-			vpSize = viewport->getSize() * _scale;
-			glViewport(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
-			glScissor(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
 			viewport->renderLighting();
+			// render quad
+			_screenQuad->render(glm::mat4(1.0f), glm::mat4(1.0f));
 		}
-
-		// render quad
-		_screenQuad->render(glm::mat4(1.0f), glm::mat4(1.0f));
 
 		// copy geometry's depth buffer to default framebuffer's depth buffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 		// blit to default framebuffer
-		glm::vec<2, unsigned> size = glm::vec2(_size) * _scale;
 		glBlitFramebuffer(0, 0, size.x, size.y, 0, 0, size.x, size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -265,6 +269,9 @@ void Window::update() {
 			glfwSwapBuffers(_window);
 		}
 		glfwPollEvents();
+	}
+	else {
+		close();
 	}
 }
 

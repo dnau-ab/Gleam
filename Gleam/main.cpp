@@ -43,8 +43,8 @@ int main() {
 	}
 	*/
 #endif
-	const unsigned WIDTH = 1024;
-	const unsigned HEIGHT = 720;
+	constexpr unsigned WIDTH = 1024;
+	constexpr unsigned HEIGHT = 720;
 
 	Window window("Hello World!", WIDTH, HEIGHT);
 	window.keyCallback = keyHandler;
@@ -52,8 +52,9 @@ int main() {
 
 	Shader* shader = Shader::getDefault();
 	Scene scene;
+	Scene aScene;
 	unsigned radius = 30;
-	unsigned numSami = 2;
+	unsigned numSami = 24;
 	for (int i = 0; i < numSami; i++) {
 		Model* varia = new Model("res/models/variasuit/DolBarriersuit.obj", shader);
 		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));
@@ -65,13 +66,42 @@ int main() {
 	view.scene = &scene;
 	view.camera = &camera;
 
-	window.addViewport(&view);
+	constexpr float numHorz = 2;
+	constexpr float numVert = 2;
+	constexpr float vWidth = WIDTH / numHorz;
+	constexpr float vHeight = HEIGHT / numVert;
+	std::vector<std::unique_ptr<Viewport> > viewports;
+	for (size_t i = 0; i < numHorz; i++) {
+		for (size_t j = 0; j < numVert; j++) {
+			float posX = i*vWidth;
+			float posY = j*vHeight;
+			viewports.emplace_back(std::make_unique<Viewport>(posX, posY, vWidth, vHeight));
+		}
+	}
+	
+	for (auto& viewport : viewports) {
+		viewport->scene = &scene;
+		viewport->camera = &camera;
+		window.addViewport(viewport.get());
+	}
 
-	DirectionalLight dLight(glm::vec3(0.2f, 0.2f, 0.2f), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(5, 5, 5));
+
+	//window.addViewport(&view);
+
+	DirectionalLight dLight({ 0.2f, 0.2f, 0.2f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f }, { 5, 5, 5 });
 	scene.addLight(&dLight);
+
+	PointLight pLight({ 0.1, 0.1, 0.1 }, { 1, 0.5, 0.2 }, { 0.2, 0.2, 0.2 }, 0, 0, 0, { 5, 5, 5 });
+	scene.addLight(&pLight);
+
+	aScene = scene;
+	scene.removeLight(&pLight);
+	scene.removeLight(&dLight);
+	viewports[0]->scene = &aScene;
 
 	while (!window.shouldClose()) {
 		float deltaTime = window.getDeltaTime();
+		float time = glfwGetTime();
 
 		if (movement) {
 			if (movement & Camera_Movement::FORWARD) {
@@ -92,11 +122,14 @@ int main() {
 			if (movement & Camera_Movement::DOWN) {
 				camera.processKeyboard(Camera_Movement::DOWN, window.getDeltaTime());
 			}
-			
 		}
+
+		pLight.position = glm::vec3(sin(time) * (radius+5), 5, cos(time) * (radius+5));
+
 		window.update();
 	}
 	window.close();
+
 	return 0;
 }
 

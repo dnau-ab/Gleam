@@ -16,6 +16,10 @@ void Viewport::setSize(glm::vec<2, unsigned> size) {
 	_size = size;
 }
 
+void Viewport::render() {
+
+}
+
 void Viewport::renderGeometry() {
 	glm::mat4 projection = camera->getProjectionMatrix((float)_size.x / (float)_size.y, 0.1f, 1000.0f);
 	glm::mat4 view = camera->getViewMatrix();
