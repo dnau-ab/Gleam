@@ -35,12 +35,15 @@ void Mesh::render(Shader* shader) {
 }
 
 std::shared_ptr<Mesh> Mesh::getLoaded(std::string path) {
-	for (auto itr = _loaded.begin(); itr != _loaded.end(); itr++) {
+	for (auto itr = _loaded.begin(); itr != _loaded.end(); ) {
 		if (itr->expired()) {
 			itr = _loaded.erase(itr);
+			continue;
 		}
-		if (itr->lock()->_path.compare(path) == 0) {
+		else if (itr->lock()->_path.compare(path) == 0) {
 			return itr->lock();
 		}
+		itr++;
 	}
+	return nullptr;
 }

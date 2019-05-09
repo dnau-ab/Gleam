@@ -184,7 +184,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height, unsig
 		glEnable(GL_STENCIL_TEST);
 		//glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		_screenQuad = std::make_unique<Quad>();
+		_screenQuad = std::make_unique<Quad>(nullptr);
 
 		Window::_windows.push_back(this);
 		_remakeFrameBuffer = true;
@@ -221,9 +221,9 @@ bool Window::shouldClose() {
 
 void Window::close() {
 	if (_window != nullptr) {
+		_windows.erase(std::find(_windows.begin(), _windows.end(), this));
 		glfwSetWindowShouldClose(_window, GLFW_TRUE);
 		glfwDestroyWindow(_window);
-		_windows.erase(std::find(_windows.begin(), _windows.end(), this));
 		_window = nullptr;
 	}
 }

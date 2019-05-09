@@ -21,8 +21,8 @@ float SCALE = 1.0f;
 
 int main() {
 #ifdef TESTING
-	Window w("Gleam", 800, 600);
-	Window w2("Taxes", 600, 400);
+	Window w("Gleam", 800, 600, 800, 600);
+	Window w2("Taxes", 600, 400, 600, 400);
 	testShaderResource();
 	testWindow();
 	testTransform();
@@ -47,6 +47,8 @@ int main() {
 		}
 	}
 	*/
+	w.close();
+	w2.close();
 #endif
 	
 	Window window("Hello World!", WIDTH, HEIGHT, (unsigned)(WIDTH / SCALE), (unsigned)(HEIGHT / SCALE));
@@ -66,6 +68,13 @@ int main() {
 		varia->transform.rotate(glm::vec3(0.0f, -i * (360.0f / numSami) + 90.0f, 0.0f));
 		scene.addRenderable(varia);
 	}
+	// add floor quad
+	Quad* quad = new Quad(Shader::getDefault());
+	quad->transform.translate({ 0, -0.1, 0 });
+	quad->transform.scale({ 100000, 100000, 1 });
+	quad->transform.rotate({ 90, 0, 0 });
+	scene.addRenderable(quad);
+
 	camera = CameraFPS(glm::vec3(0.0f, 10.0f, 80.0f));
 	Viewport view(0, 0, WIDTH / SCALE, HEIGHT / SCALE);
 	view.scene = &scene;
