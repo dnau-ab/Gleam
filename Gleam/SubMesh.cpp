@@ -38,6 +38,14 @@ SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned
 	init();
 }
 
+unsigned int SubMesh::numVertices() {
+	return _vertices.size();
+}
+
+unsigned int SubMesh::numIndices() {
+	return _indices.size();
+}
+
 void SubMesh::render(Shader* shader) {
 	// bind the textures, material properties
 	material.bind(shader);

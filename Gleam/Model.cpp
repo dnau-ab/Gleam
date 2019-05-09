@@ -12,18 +12,6 @@ void Model::setPath(const std::string& path) {
 	}
 }
 
-Model::Model(std::string path, bool loadTextures) {
-	setPath(path);
-	_mesh = MeshLoader::loadMesh(_directory, _fileName, loadTextures);
-	_shader = Shader::getDefault();
-}
-
-Model::Model(std::string path, Shader* shader, bool loadTextures) {
-	setPath(path);
-	_mesh = MeshLoader::loadMesh(_directory, _fileName, loadTextures);
-	_shader = shader;
-}
-
 Model::Model(std::shared_ptr<Mesh> mesh, Shader* shader) {
 	_mesh = mesh;
 	_shader = shader;

@@ -11,6 +11,15 @@ Mesh::Mesh(const std::vector<SubMesh>& meshes, const std::string& path)
 
 }
 
+Mesh::Mesh(const Mesh& mesh) {
+	_meshes = mesh._meshes;
+	_path = mesh._path;
+}
+
+unsigned int Mesh::numOfSubMeshes() {
+	return _meshes.size();
+}
+
 SubMesh* Mesh::getSubMesh(unsigned index) {
 	if (index >= _meshes.size()) {
 		return nullptr;

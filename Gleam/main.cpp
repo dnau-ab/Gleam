@@ -54,13 +54,14 @@ int main() {
 	window.mouseCallback = mouseHandler;
 	window.scrollCallback = scrollHandler;
 
+	std::shared_ptr<Mesh> variaMesh = MeshLoader::loadMesh("res/models/variasuit/", "DolBarriersuit.obj", true);
 	Shader* shader = Shader::getDefault();
 	Scene scene;
 	Scene aScene;
 	unsigned radius = 30;
 	unsigned numSami = 24;
-	for (int i = 0; i < (int)numSami; i++) {
-		Model* varia = new Model("res/models/variasuit/DolBarriersuit.obj", shader);
+	for (int i = 0; i < numSami; i++) {
+		Model* varia = new Model(variaMesh, shader);
 		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));
 		varia->transform.rotate(glm::vec3(0.0f, -i * (360.0f / numSami) + 90.0f, 0.0f));
 		scene.addRenderable(varia);

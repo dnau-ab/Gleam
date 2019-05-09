@@ -15,8 +15,6 @@ protected:
 	std::string _directory;
 
 public:
-	Model(std::string path, bool loadTextures = true);
-	Model(std::string path, Shader* shader, bool loadTextures = true);
 	Model(std::shared_ptr<Mesh> mesh, Shader* shader);
 	Model(std::shared_ptr<Mesh> mesh);
 
