@@ -13,6 +13,12 @@
 #include "Viewport.h"
 #include "Quad.h"
 
+enum class AspectMode {
+	LOCK = 0,
+	STRETCH,
+	FREE
+};
+
 class Window {
 private:
 	static std::vector<Window*> _windows;
@@ -37,11 +43,16 @@ private:
 protected:
 	std::string _title;
 	glm::vec<2, unsigned> _size;
+	glm::vec<2, unsigned> _resolution;
+	float _aspectRatio;
 	glm::vec2 _scale;
 
 	GLFWwindow* _window;
 	std::vector<Viewport*> _viewports;
 	double _deltaTime;
+
+	// options
+	AspectMode _aspectMode;
 
 	/*TODO **Destructor** */
 public:
@@ -55,12 +66,19 @@ public:
 	ScrollCallback scrollCallback = nullptr;
 	FramebufferSizeCallback framebufferSizeCallback = nullptr;
 
-	Window(std::string title, unsigned int width, unsigned int height);
+	Window(std::string title, unsigned int width, unsigned int height, unsigned int renderWidth, unsigned int renderHeight);
 	~Window();
 
 	void addViewport(Viewport* viewport);
 	void removeViewport(Viewport* viewport);
 	void setCursorMode(int type);
+
+	void setResolution(unsigned int width, unsigned int height);
+	void setResolution(const glm::vec<2, unsigned>& resolution);
+	glm::vec<2, unsigned> getResolution() const;
+
+	void setAspectMode(AspectMode mode);
+	AspectMode getAspectMode();
 
 	bool shouldClose();
 	void close();

@@ -42,9 +42,10 @@ void Window::framebufferSizeSwitch(GLFWwindow* window, int width, int height) {
 	for (size_t i = 0; i < _windows.size(); i++) {
 		if (window == _windows[i]->_window) {
 			// always update window scale
-			_windows[i]->_scale.x = (float)width / _windows[i]->_size.x;
-			_windows[i]->_scale.y = (float)height / _windows[i]->_size.y;
-			_windows[i]->initGBuffer(); // resize GBuffer
+			_windows[i]->_size.x = (unsigned) width;
+			_windows[i]->_size.y = (unsigned) height;
+
+			
 			// call callback if it exists
 			if (_windows[i]->framebufferSizeCallback != nullptr) {
 				_windows[i]->framebufferSizeCallback(_windows[i], width, height);
@@ -74,7 +75,7 @@ void Window::initGBuffer() {
 		glDeleteTextures(1, &_gColorSpec);
 	}
 
-	glm::vec<2, unsigned> size = glm::vec2(_size) * _scale;
+	glm::vec<2, unsigned> size = glm::vec2(_resolution);
 
 	glGenFramebuffers(1, &_gBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
@@ -83,24 +84,24 @@ void Window::initGBuffer() {
 	glGenTextures(1, &_gPosition);
 	glBindTexture(GL_TEXTURE_2D, _gPosition);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, size.x, size.y, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
 
 	// normal color buffer
 	glGenTextures(1, &_gNormal);
 	glBindTexture(GL_TEXTURE_2D, _gNormal);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, size.x, size.y, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal, 0);
 
 	// color + specular color buffer
 	glGenTextures(1, &_gColorSpec);
 	glBindTexture(GL_TEXTURE_2D, _gColorSpec);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gColorSpec, 0);
 
 	// add attachments to framebuffer 
@@ -121,10 +122,15 @@ void Window::initGBuffer() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Window::Window(std::string title, unsigned int width, unsigned int height) : _scale(1.0f, 1.0f) {
+Window::Window(std::string title, unsigned int width, unsigned int height, unsigned int renderWidth, unsigned int renderHeight) : _scale(1.0f, 1.0f) {
 	_size.x = width;
 	_size.y = height;
+	_resolution.x = renderWidth;
+	_resolution.y = renderHeight;
+	_aspectRatio = renderWidth / (float)renderHeight;
 	_title = title;
+
+	_aspectMode = AspectMode::LOCK;
 
 	if (!_backendReady) {
 		initBackend();
@@ -137,6 +143,9 @@ Window::Window(std::string title, unsigned int width, unsigned int height) : _sc
 			exit(1);
 		}
 		glfwMakeContextCurrent(_window);
+
+		// window options
+		glfwSetWindowSizeLimits(_window, 800, 600, 10000, 10000);
 
 		// set callbacks
 		glfwSetFramebufferSizeCallback(_window, framebufferSizeSwitch);
@@ -160,6 +169,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height) : _sc
 
 		Window::_windows.push_back(this);
 		framebufferSizeSwitch(_window, _size.x, _size.y);
+		initGBuffer();
 	}
 }
 
@@ -231,8 +241,8 @@ void Window::update() {
 		glm::vec<2, int> vpPos;
 		glm::vec<2, unsigned> vpSize;
 		for (Viewport*& viewport : _viewports) {
-			vpPos = viewport->getPosition() * _scale;
-			vpSize = viewport->getSize() * _scale;
+			vpPos = viewport->getPosition();
+			vpSize = viewport->getSize();
 			glViewport(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
 			glScissor(vpPos.x, vpPos.y, vpSize.x, vpSize.y);
 			viewport->renderGeometry();
@@ -247,21 +257,47 @@ void Window::update() {
 		glBindTexture(GL_TEXTURE_2D, _gNormal);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, _gColorSpec);
-		glm::vec<2, unsigned> size = glm::vec2(_size) * _scale;
-		glViewport(0, 0, size.x, size.y);
-		glScissor(0, 0, size.x, size.y);
+
+		glm::vec<2, unsigned> size = glm::vec2(_resolution);
+		if (_aspectMode == AspectMode::STRETCH || _aspectMode == AspectMode::FREE) {
+			glViewport(0, 0, _size.x, _size.y);
+			glScissor(0, 0, _size.x, _size.y);
+		}
+		else {
+			float windowAspect = _size.x / (float) _size.y;
+			unsigned int diff = 0;
+			float viewportRatio = 0;
+			if (_aspectRatio - windowAspect < 0.0) {
+				// clamp x
+				diff = glm::abs(_size.x - _size.y * _aspectRatio) / 2.0f;
+				glViewport(0 + diff, 0, _size.x - diff * 2, _size.y);
+				glScissor(0 + diff, 0, _size.x - diff * 2, _size.y);
+				viewportRatio = (_size.x - 2 * diff) / (float)_size.y;
+			}
+			else {
+				// clamp y
+				diff = glm::abs(_size.y - _size.x * (1 / _aspectRatio)) / 2.0f;
+				glViewport(0, 0 + diff, _size.x, _size.y - diff * 2);
+				glScissor(0, 0 + diff, _size.x, _size.y - diff * 2);
+				viewportRatio = (float)_size.x / (size.y - 2 * diff);
+			}
+			diff = 1 + 1;
+		}
+
 		for (Viewport*& viewport : _viewports) {
 			viewport->renderLighting();
 			// render quad
 			_screenQuad->render(glm::mat4(1.0f), glm::mat4(1.0f));
 		}
-
 		// copy geometry's depth buffer to default framebuffer's depth buffer
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 		// blit to default framebuffer
-		glBlitFramebuffer(0, 0, size.x, size.y, 0, 0, size.x, size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, size.x, size.y, 0, 0, _size.x, _size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glViewport(0, 0, _size.x, _size.y);
+		glScissor(0, 0, _size.x, _size.y);
 
 		// forward rendered lights here vvv
 
@@ -282,4 +318,26 @@ void Window::update() {
 */
 void Window::setCursorMode(int type) {
 	glfwSetInputMode(_window, GLFW_CURSOR, type);
+}
+
+void Window::setResolution(unsigned int width, unsigned int height) {
+	setResolution(glm::vec<2, unsigned>(width, height));
+}
+
+void Window::setResolution(const glm::vec<2, unsigned>& resolution) {
+	_resolution = resolution;
+	_aspectRatio = resolution.x / (float)resolution.y;
+}
+
+glm::vec<2, unsigned> Window::getResolution() const {
+	return _resolution;
+}
+
+void Window::setAspectMode(AspectMode mode) {
+	_aspectMode = mode;
+	initGBuffer();
+}
+
+AspectMode Window::getAspectMode() {
+	return _aspectMode;
 }

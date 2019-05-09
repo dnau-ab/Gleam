@@ -1,7 +1,7 @@
 #include "TestUtils.h"
 
 void testWindow() {
-	Window window1("Test Window", 600, 400);
+	Window window1("Test Window", 600, 400, 600, 400);
 	double dt;
 	assert(window1.shouldClose() == false);
 	if (!window1.shouldClose()) {

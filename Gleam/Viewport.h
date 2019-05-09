@@ -26,6 +26,11 @@ protected:
 	glm::vec<2, unsigned> _size;
 	Shader _lightingShader;
 
+	unsigned int _gBuffer = 0;
+	unsigned int _gPosition = 0;
+	unsigned int _gNormal = 0;
+	unsigned int _gColorSpec = 0;
+
 public:
 	Scene* scene = nullptr;
 	Camera* camera = nullptr;

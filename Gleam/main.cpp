@@ -43,10 +43,12 @@ int main() {
 	}
 	*/
 #endif
-	constexpr unsigned WIDTH = 1024;
-	constexpr unsigned HEIGHT = 720;
+	constexpr unsigned HEIGHT = 1080;
+	constexpr unsigned WIDTH = HEIGHT * 16/9.0;
 
-	Window window("Hello World!", WIDTH, HEIGHT);
+	const float SCALE =	1.0f;
+
+	Window window("Hello World!", WIDTH, HEIGHT, WIDTH / SCALE, HEIGHT / SCALE);
 	window.keyCallback = keyHandler;
 	window.mouseCallback = mouseHandler;
 
@@ -62,14 +64,14 @@ int main() {
 		scene.addRenderable(varia);
 	}
 	camera = CameraFPS(glm::vec3(0.0f, 10.0f, 80.0f));
-	Viewport view(0, 0, WIDTH, HEIGHT);
+	Viewport view(0, 0, WIDTH / SCALE, HEIGHT / SCALE);
 	view.scene = &scene;
 	view.camera = &camera;
 
-	constexpr float numHorz = 2;
-	constexpr float numVert = 2;
-	constexpr float vWidth = WIDTH / numHorz;
-	constexpr float vHeight = HEIGHT / numVert;
+	constexpr float numHorz = 1;
+	constexpr float numVert = 1;
+	const float vWidth = WIDTH / SCALE / numHorz;
+	const float vHeight = HEIGHT / SCALE / numVert;
 	std::vector<std::unique_ptr<Viewport> > viewports;
 	for (size_t i = 0; i < numHorz; i++) {
 		for (size_t j = 0; j < numVert; j++) {

@@ -9,7 +9,7 @@ protected:
 		: ambient(ambient), diffuse(diffuse), specular(specular) {}
 
 public:
-	virtual ~Light();
+	virtual ~Light() {}
 
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
