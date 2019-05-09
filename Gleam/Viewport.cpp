@@ -8,11 +8,11 @@ glm::vec2 Viewport::getSize() {
 	return _size;
 }
 
-void Viewport::setPosition(glm::vec<2, int> position) {
+void Viewport::setPosition(glm::vec2 position) {
 	_position = position;
 }
 
-void Viewport::setSize(glm::vec<2, unsigned> size) {
+void Viewport::setSize(glm::vec2 size) {
 	_size = size;
 }
 
@@ -20,8 +20,8 @@ void Viewport::render() {
 
 }
 
-void Viewport::renderGeometry() {
-	glm::mat4 projection = camera->getProjectionMatrix((float)_size.x / (float)_size.y, 0.1f, 1000.0f);
+void Viewport::renderGeometry(float aspectRatio) {
+	glm::mat4 projection = camera->getProjectionMatrix(aspectRatio, 0.1f, 1000.0f);
 	glm::mat4 view = camera->getViewMatrix();
 
 	for (Renderable*& renderable : scene->getRenderables()) {

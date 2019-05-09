@@ -9,10 +9,15 @@
 
 void keyHandler (Window* window, int key, int scancode, int action, int mods);
 void mouseHandler (Window* window, double xPos, double yPos);
+void scrollHandler(Window* window, double xOffset, double yOffset);
 
 CameraFPS camera;
 bool cameraEnabled;
 uint8_t movement = Camera_Movement::NONE;
+
+constexpr unsigned HEIGHT = 1080;
+constexpr unsigned WIDTH = (unsigned)(HEIGHT * 16 / 9.0);
+float SCALE = 1.0f;
 
 int main() {
 #ifdef TESTING
@@ -43,21 +48,18 @@ int main() {
 	}
 	*/
 #endif
-	constexpr unsigned HEIGHT = 1080;
-	constexpr unsigned WIDTH = HEIGHT * 16/9.0;
-
-	const float SCALE =	1.0f;
-
-	Window window("Hello World!", WIDTH, HEIGHT, WIDTH / SCALE, HEIGHT / SCALE);
+	
+	Window window("Hello World!", WIDTH, HEIGHT, (unsigned)(WIDTH / SCALE), (unsigned)(HEIGHT / SCALE));
 	window.keyCallback = keyHandler;
 	window.mouseCallback = mouseHandler;
+	window.scrollCallback = scrollHandler;
 
 	Shader* shader = Shader::getDefault();
 	Scene scene;
 	Scene aScene;
 	unsigned radius = 30;
 	unsigned numSami = 24;
-	for (int i = 0; i < numSami; i++) {
+	for (int i = 0; i < (int)numSami; i++) {
 		Model* varia = new Model("res/models/variasuit/DolBarriersuit.obj", shader);
 		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));
 		varia->transform.rotate(glm::vec3(0.0f, -i * (360.0f / numSami) + 90.0f, 0.0f));
@@ -70,8 +72,8 @@ int main() {
 
 	constexpr float numHorz = 1;
 	constexpr float numVert = 1;
-	const float vWidth = WIDTH / SCALE / numHorz;
-	const float vHeight = HEIGHT / SCALE / numVert;
+	const float vWidth = 1.0f / numHorz;
+	const float vHeight = 1.0f / numVert;
 	std::vector<std::unique_ptr<Viewport> > viewports;
 	for (size_t i = 0; i < numHorz; i++) {
 		for (size_t j = 0; j < numVert; j++) {
@@ -102,27 +104,27 @@ int main() {
 	viewports[0]->scene = &aScene;
 
 	while (!window.shouldClose()) {
-		float deltaTime = window.getDeltaTime();
-		float time = glfwGetTime();
+		float deltaTime = (float)window.getDeltaTime();
+		float time = (float)glfwGetTime();
 
 		if (movement) {
 			if (movement & Camera_Movement::FORWARD) {
-				camera.processKeyboard(Camera_Movement::FORWARD, window.getDeltaTime());
+				camera.processKeyboard(Camera_Movement::FORWARD, deltaTime);
 			}
 			if (movement & Camera_Movement::BACKWARD) {
-				camera.processKeyboard(Camera_Movement::BACKWARD, window.getDeltaTime());
+				camera.processKeyboard(Camera_Movement::BACKWARD, deltaTime);
 			}
 			if (movement & Camera_Movement::LEFT) {
-				camera.processKeyboard(Camera_Movement::LEFT, window.getDeltaTime());
+				camera.processKeyboard(Camera_Movement::LEFT, deltaTime);
 			}
 			if (movement & Camera_Movement::RIGHT) {
-				camera.processKeyboard(Camera_Movement::RIGHT, window.getDeltaTime());
+				camera.processKeyboard(Camera_Movement::RIGHT, deltaTime);
 			}
 			if (movement & Camera_Movement::UP) {
-				camera.processKeyboard(Camera_Movement::UP, window.getDeltaTime());
+				camera.processKeyboard(Camera_Movement::UP, deltaTime);
 			}
 			if (movement & Camera_Movement::DOWN) {
-				camera.processKeyboard(Camera_Movement::DOWN, window.getDeltaTime());
+				camera.processKeyboard(Camera_Movement::DOWN, deltaTime);
 			}
 		}
 
@@ -138,13 +140,13 @@ int main() {
 void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		switch (key) {
-		case GLFW_KEY_4:
+		case GLFW_KEY_3:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // fill mode
 			break;
-		case GLFW_KEY_5:
+		case GLFW_KEY_4:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
 			break;
-		case GLFW_KEY_6:
+		case GLFW_KEY_5:
 			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // point mode
 			break;
 		case GLFW_KEY_W:
@@ -172,6 +174,15 @@ void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 		case GLFW_KEY_2:
 			window->setCursorMode(GLFW_CURSOR_NORMAL);
 			cameraEnabled = false;
+			break;
+		case GLFW_KEY_6:
+			window->setAspectMode(AspectMode::LOCK);
+			break;
+		case GLFW_KEY_7:
+			window->setAspectMode(AspectMode::STRETCH);
+			break;
+		case GLFW_KEY_8:
+			window->setAspectMode(AspectMode::FREE);
 			break;
 		case GLFW_KEY_ESCAPE:
 			window->close();
@@ -208,8 +219,15 @@ void mouseHandler(Window* window, double xPos, double yPos) {
 
 	if (!cameraEnabled) return;
 	printf("X: %f\nY: %f\n\n", xPos - lastX, yPos - lastY);
-	camera.processMouseMovement(xPos - lastX, lastY - yPos);
+	camera.processMouseMovement((float)(xPos - lastX), (float)(lastY - yPos));
 
 	lastX = xPos;
 	lastY = yPos;
+}
+
+void scrollHandler(Window* window, double xOffset, double yOffset) {
+	float deltaResolution = 0.1f * SCALE * yOffset;
+	SCALE += deltaResolution;
+
+	window->setResolution(WIDTH / SCALE, HEIGHT / SCALE);
 }

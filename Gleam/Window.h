@@ -42,10 +42,9 @@ private:
 
 protected:
 	std::string _title;
-	glm::vec<2, unsigned> _size;
+	glm::vec<2, unsigned> _windowSize;
 	glm::vec<2, unsigned> _resolution;
 	float _aspectRatio;
-	glm::vec2 _scale;
 
 	GLFWwindow* _window;
 	std::vector<Viewport*> _viewports;
@@ -53,6 +52,7 @@ protected:
 
 	// options
 	AspectMode _aspectMode;
+	bool _remakeFrameBuffer;
 
 	/*TODO **Destructor** */
 public:
