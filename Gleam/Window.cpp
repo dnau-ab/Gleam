@@ -125,7 +125,7 @@ void Window::initGBuffer() {
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	//glBindTexture(GL_TEXTURE_2D, 0);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, size.x, size.y);
@@ -164,7 +164,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height, unsig
 		glfwMakeContextCurrent(_window);
 
 		// window options
-		glfwSetWindowSizeLimits(_window, 800, 600, 10000, 10000);
+		//glfwSetWindowSizeLimits(_window, 800, 600, 10000, 10000);
 
 		// set callbacks
 		glfwSetFramebufferSizeCallback(_window, framebufferSizeSwitch);
@@ -252,20 +252,8 @@ void Window::update() {
 			initGBuffer();
 		}
 
-		// render
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// geometry pass
-		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 		float aspectRatio;
-		glm::vec2 vpPos;
-		glm::vec2 vpSize;
 		glm::vec2 renderSize;
-		glm::vec<4, int> dimensions;
-
 
 		if (_aspectMode == AspectMode::FREE) {
 			renderSize = _windowSize;
@@ -276,6 +264,25 @@ void Window::update() {
 			aspectRatio = _resolution.x / (float)_resolution.y;
 		}
 
+		
+
+		// render
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, _windowSize.x, _windowSize.y);
+		glScissor(0, 0, _windowSize.x, _windowSize.y);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// geometry pass
+		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
+		glViewport(0, 0, renderSize.x, renderSize.y);
+		glScissor(0, 0, renderSize.x, renderSize.y);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glm::vec2 vpPos;
+		glm::vec2 vpSize;
+		glm::vec<4, int> dimensions;
+
 		for (Viewport*& viewport : _viewports) {
 			vpPos = viewport->getPosition();
 			vpSize = viewport->getSize();
@@ -285,6 +292,7 @@ void Window::update() {
 			dimensions.z = (int)(vpSize.x * renderSize.x);
 			dimensions.w = (int)(vpSize.y * renderSize.y);
 
+			glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
 			glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 			glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 			viewport->renderGeometry(aspectRatio);
@@ -292,7 +300,6 @@ void Window::update() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		
 		// lighting pass
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, _gPosition);
 		glActiveTexture(GL_TEXTURE1);
@@ -300,7 +307,6 @@ void Window::update() {
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, _gColorSpec);
 
-		glm::vec<2, unsigned> size = glm::vec2(_resolution);
 		if (_aspectMode == AspectMode::STRETCH || _aspectMode == AspectMode::FREE) {
 			glViewport(0, 0, _windowSize.x, _windowSize.y);
 			glScissor(0, 0, _windowSize.x, _windowSize.y);
@@ -308,22 +314,18 @@ void Window::update() {
 		else {
 			float windowAspect = _windowSize.x / (float)_windowSize.y;
 			unsigned int diff = 0;
-			float viewportRatio = 0;
 			if (_aspectRatio - windowAspect < 0.0) {
 				// clamp x
 				diff = (unsigned)(glm::abs(_windowSize.x - _windowSize.y * _aspectRatio) / 2.0f);
 				glViewport(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
 				glScissor(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
-				viewportRatio = (_windowSize.x - 2 * diff) / (float)_windowSize.y;
 			}
 			else {
 				// clamp y
 				diff = (unsigned)(glm::abs(_windowSize.y - _windowSize.x * (1 / _aspectRatio)) / 2.0f);
 				glViewport(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
 				glScissor(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
-				viewportRatio = (float)_windowSize.x / (size.y - 2 * diff);
 			}
-			diff = 1 + 1;
 		}
 		for (Viewport*& viewport : _viewports) {
 			viewport->renderLighting();
@@ -334,13 +336,8 @@ void Window::update() {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 		// blit to default framebuffer
-		glBlitFramebuffer(0, 0, size.x, size.y, 0, 0, _windowSize.x, _windowSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		glViewport(0, 0, _windowSize.x, _windowSize.y);
-		glScissor(0, 0, _windowSize.x, _windowSize.y);
-
-		// forward rendered lights here vvv
 
 		if (_window != nullptr) {
 			glfwSwapBuffers(_window);

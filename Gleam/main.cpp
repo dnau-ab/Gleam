@@ -15,7 +15,7 @@ CameraFPS camera;
 bool cameraEnabled;
 uint8_t movement = Camera_Movement::NONE;
 
-constexpr unsigned HEIGHT = 1080;
+constexpr unsigned HEIGHT = 720;
 constexpr unsigned WIDTH = (unsigned)(HEIGHT * 16 / 9.0);
 float SCALE = 1.0f;
 
@@ -90,6 +90,10 @@ int main() {
 		window.addViewport(viewport.get());
 	}
 
+	//window.removeViewport(viewports[0].get());
+	//window.removeViewport(viewports[1].get());
+	//window.removeViewport(viewports[2].get());
+	//window.removeViewport(viewports[3].get());
 
 	//window.addViewport(&view);
 
