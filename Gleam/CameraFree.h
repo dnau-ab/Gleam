@@ -1,23 +1,23 @@
 #pragma once
 #include "Camera.h"
 
-class CameraFPS : public Camera{
+class CameraFree : public Camera{
 private:
 	static constexpr float SPEED = 12.5f;
-	static constexpr float SENSITIVITY = 0.1f;
+	static constexpr float SENSITIVITY = 0.0020f;
 	static constexpr float ZOOM = 45.0f;
 
 	// Calculates the front vector from the Camera's (updated) Euler Angles
 	void updateCameraVectors();
 
 public:
-	CameraFPS(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+	CameraFree(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f), 
 		float movementSpeed = SPEED, float sensitivity = SENSITIVITY, float zoom = ZOOM)
 		: Camera(position, rotation, worldUp), movementSpeed(movementSpeed), mouseSensitivity(sensitivity), zoom(zoom) {}
 	
-	CameraFPS(float posX, float posY, float posZ, 
+	CameraFree(float posX, float posY, float posZ, 
 		float rotX, float rotY, float rotZ,
 		float worldUpX, float worldUpY, float worldUpZ, 
 		float movementSpeed = SPEED, float sensitivity = SENSITIVITY, float zoom = ZOOM)

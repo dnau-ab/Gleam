@@ -5,13 +5,13 @@
 	#include "TestUtils.h"
 #endif
 #include "Window.h"
-#include "CameraFPS.h"
+#include "CameraFree.h"
 
 void keyHandler (Window* window, int key, int scancode, int action, int mods);
 void mouseHandler (Window* window, double xPos, double yPos);
 void scrollHandler(Window* window, double xOffset, double yOffset);
 
-CameraFPS camera;
+CameraFree camera;
 bool cameraEnabled;
 uint8_t movement = Camera_Movement::NONE;
 
@@ -75,7 +75,7 @@ int main() {
 	quad->transform.rotate({ 90, 0, 0 });
 	scene.addRenderable(quad);
 
-	camera = CameraFPS(glm::vec3(0.0f, 10.0f, 80.0f));
+	camera = CameraFree(glm::vec3(0.0f, 10.0f, 80.0f));
 	Viewport view(0, 0, WIDTH / SCALE, HEIGHT / SCALE);
 	view.scene = &scene;
 	view.camera = &camera;
@@ -140,6 +140,12 @@ int main() {
 			if (movement & Camera_Movement::DOWN) {
 				camera.processKeyboard(Camera_Movement::DOWN, deltaTime);
 			}
+			if (movement & Camera_Movement::ROLL_LEFT) {
+				camera.processKeyboard(Camera_Movement::ROLL_LEFT, deltaTime);
+			}
+			if (movement & Camera_Movement::ROLL_RIGHT) {
+				camera.processKeyboard(Camera_Movement::ROLL_RIGHT, deltaTime);
+			}
 		}
 
 		pLight.position = glm::vec3(sin(time) * (radius+5), 5, cos(time) * (radius+5));
@@ -180,6 +186,12 @@ void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
 			movement |= Camera_Movement::DOWN;
+			break;
+		case GLFW_KEY_Q:
+			movement |= Camera_Movement::ROLL_LEFT;
+			break;
+		case GLFW_KEY_E:
+			movement |= Camera_Movement::ROLL_RIGHT;
 			break;
 		case GLFW_KEY_1:
 			window->setCursorMode(GLFW_CURSOR_DISABLED);
@@ -224,6 +236,13 @@ void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
 			movement &= ~Camera_Movement::DOWN;
+			break;
+		case GLFW_KEY_Q:
+			movement &= ~Camera_Movement::ROLL_LEFT;
+			break;
+		case GLFW_KEY_E:
+			movement &= ~Camera_Movement::ROLL_RIGHT;
+			break;
 		}
 	}
 }
@@ -233,7 +252,7 @@ void mouseHandler(Window* window, double xPos, double yPos) {
 
 	if (!cameraEnabled) return;
 	printf("X: %f\nY: %f\n\n", xPos - lastX, yPos - lastY);
-	camera.processMouseMovement((float)(xPos - lastX), (float)(lastY - yPos));
+	camera.processMouseMovement((float)(xPos - lastX), (float)(yPos - lastY));
 
 	lastX = xPos;
 	lastY = yPos;
