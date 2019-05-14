@@ -6,6 +6,10 @@
 #endif
 #include "Window.h"
 #include "CameraFree.h"
+#include "Cube.h"
+#include "Sphere.h"
+#include "Cone.h"
+#include "Cylinder.h"
 
 void keyHandler (Window* window, int key, int scancode, int action, int mods);
 void mouseHandler (Window* window, double xPos, double yPos);
@@ -50,7 +54,7 @@ int main() {
 	w.close();
 	w2.close();
 #endif
-	
+
 	Window window("Hello World!", WIDTH, HEIGHT, (unsigned)(WIDTH / SCALE), (unsigned)(HEIGHT / SCALE));
 	window.keyCallback = keyHandler;
 	window.mouseCallback = mouseHandler;
@@ -61,20 +65,44 @@ int main() {
 	Scene scene;
 	Scene aScene;
 	unsigned radius = 30;
-	unsigned numSami = 24;
+	unsigned numSami = 6;
 	for (int i = 0; i < numSami; i++) {
 		Model* varia = new Model(variaMesh, shader);
 		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));
 		varia->transform.rotate(glm::vec3(0.0f, -i * (360.0f / numSami) + 90.0f, 0.0f));
 		scene.addRenderable(varia);
 	}
+
+	Model samus(variaMesh);
+	samus.transform.scale({ 0.25, 0.25, 0.25 });
+	samus.transform.translate({ 0, 15, 0 });
+	scene.addRenderable(&samus);
+
 	// add floor quad
 	Quad* quad = new Quad(Shader::getDefault());
 	quad->transform.translate({ 0, -0.1, 0 });
 	quad->transform.scale({ 100000, 100000, 1 });
-	quad->transform.rotate({ 90, 0, 0 });
+	quad->transform.rotate({ -90, 0, 0 });
 	scene.addRenderable(quad);
 
+	Cube cube;
+	cube.transform.translate({ 0, 2.5, 0 });
+	cube.material.addTexture(Texture("res/desert.png", "diffuse"));
+	scene.addRenderable(&cube);
+	
+	Sphere sphere;
+	sphere.transform.translate({ 0, 5, 0 });
+	sphere.material.addTexture(Texture("res/desert.png", "diffuse"));
+	scene.addRenderable(&sphere);
+	
+	Cone cone;
+	cone.transform.translate({ 0, 8, 0 });
+	scene.addRenderable(&cone);
+
+	Cylinder cylinder;
+	cylinder.transform.translate({ 0, 11, 0 });
+	scene.addRenderable(&cylinder);
+	
 	camera = CameraFree(glm::vec3(0.0f, 10.0f, 80.0f));
 	Viewport view(0, 0, WIDTH / SCALE, HEIGHT / SCALE);
 	view.scene = &scene;
@@ -150,6 +178,17 @@ int main() {
 
 		pLight.position = glm::vec3(sin(time) * (radius+5), 5, cos(time) * (radius+5));
 
+		cube.transform.rotate({ 0, 50 * window.getDeltaTime(), 0 });
+		sphere.transform.rotate({ 0, 60 * window.getDeltaTime(), 0 });
+		cone.transform.rotate({ 0, 70 * window.getDeltaTime(), 0 });
+		cylinder.transform.rotate({ 0, 90 * window.getDeltaTime(), 0 });
+
+		samus.transform.rotate({ 0, 100 * window.getDeltaTime(), 0 });
+		
+		float scale = 1 + sin(time) * 0.5f;
+		cube.transform.setScale({ scale, scale, scale });
+
+		//dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
 		window.update();
 	}
 	window.close();

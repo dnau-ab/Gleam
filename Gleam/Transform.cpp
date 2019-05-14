@@ -33,6 +33,7 @@ void Transform::rotate(const glm::vec3& euler) {
 }
 
 void Transform::lookAt(const glm::vec3& target, const glm::vec3& up) {
+	// TODO: FIX
 	_rotation = glm::lookAt(_position, target, up);
 }
 

@@ -1,22 +1,23 @@
 #pragma once
 #include "Renderable.h"
-#include "SubMesh.h"
+#include "Material.h"
 
 class Quad : public Renderable {
 private:
 	unsigned int _VAO;
 	unsigned int _VBO;
-	std::vector<float> _vertices;
+	unsigned int _numVertices;
 
 protected:
 	void init() {
 		float quadVertices[] = {
-			// positions        // normals        // texture Coords
-			-1.0f,  1.0f, 0.0f, 0.0f,1.0f, 0.0f,  0.0f, 1.0f,
-			-1.0f, -1.0f, 0.0f, 0.0f,1.0f, 0.0f,  0.0f, 0.0f,
-			 1.0f,  1.0f, 0.0f, 0.0f,1.0f, 0.0f,  1.0f, 1.0f,
-			 1.0f, -1.0f, 0.0f, 0.0f,1.0f, 0.0f,  1.0f, 0.0f,
+			// positions         // normals         // texture Coords
+			-1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
 		};
+		_numVertices = 4;
 
 		// setup plane VAO
 		glGenVertexArrays(1, &_VAO);
@@ -66,10 +67,11 @@ public:
 			_shader->setMat4("model", transform.getTransformationMatrix());
 			_shader->setMat4("view", view);
 			_shader->setMat4("projection", projection);
+			_shader->setMat3("normalMat", getNormalMatrix());
 			material.bind(_shader);
 		}
 		glBindVertexArray(_VAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, _numVertices);
 		glBindVertexArray(0);
 	}
 
