@@ -32,13 +32,13 @@ void CameraFree::processKeyboard(Camera_Movement direction, float deltaTime)
 		transform.translate(-(up * velocity));
 	}
 	if (direction == ROLL_LEFT) {
-		glm::quat rollQuat = glm::angleAxis(200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::quat rollQuat = glm::angleAxis(-200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 		glm::quat keyQuat = rollQuat * transform.getRotation();
 		transform.setRotation(keyQuat);
 		updateCameraVectors();
 	}
 	if (direction == ROLL_RIGHT) {
-		glm::quat rollQuat = glm::angleAxis(-200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::quat rollQuat = glm::angleAxis(200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 		glm::quat keyQuat = rollQuat * transform.getRotation();
 		transform.setRotation(keyQuat);
 		updateCameraVectors();
