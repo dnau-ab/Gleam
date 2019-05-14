@@ -15,7 +15,7 @@ void keyHandler (Window* window, int key, int scancode, int action, int mods);
 void mouseHandler (Window* window, double xPos, double yPos);
 void scrollHandler(Window* window, double xOffset, double yOffset);
 
-CameraFree camera;
+CameraFree camera(glm::vec3(0.0f, 10.0f, 80.0f));
 bool cameraEnabled;
 uint8_t movement = Camera_Movement::NONE;
 
@@ -103,7 +103,6 @@ int main() {
 	cylinder.transform.translate({ 0, 11, 0 });
 	scene.addRenderable(&cylinder);
 	
-	camera = CameraFree(glm::vec3(0.0f, 10.0f, 80.0f));
 	Viewport view(0, 0, WIDTH / SCALE, HEIGHT / SCALE);
 	view.scene = &scene;
 	view.camera = &camera;
@@ -188,7 +187,7 @@ int main() {
 		float scale = 1 + sin(time) * 0.5f;
 		cube.transform.setScale({ scale, scale, scale });
 
-		//dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
+		dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
 		window.update();
 	}
 	window.close();

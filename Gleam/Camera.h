@@ -12,6 +12,9 @@
 
 #include "Transform.h"
 
+const float DEFAULT_NEAR_PLANE = 0.5f;
+const float DEFAULT_FAR_PLANE = 1000.0f;
+
 enum Camera_Movement {
 	NONE = 0,
 	FORWARD = 1,
@@ -26,14 +29,22 @@ enum Camera_Movement {
 
 class Camera {
 private:
+	float _nearPlane;
+	float _farPlane;
+
 	virtual void updateCameraVectors() = 0;
 protected:
-	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f))
-		: transform(position, rotation), worldUp(worldUp), up(worldUp), front(0.0f, 0.0f, -1.0f) {}
+	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), 
+		glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), 
+		glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f), 
+		float nearPlane = DEFAULT_NEAR_PLANE, float farPlane = DEFAULT_FAR_PLANE)
+		: transform(position, rotation), worldUp(worldUp), up(worldUp), front(0.0f, 0.0f, -1.0f), _nearPlane(nearPlane), _farPlane(farPlane) {}
+
 	Camera(float posX, float posY, float posZ, 
 		float rotX, float rotY, float rotZ,
-		float worldUpX, float worldUpY, float worldUpZ)
-		: transform(glm::vec3(posX, posY, posZ), glm::vec3(rotX, rotY, rotZ)), worldUp(worldUpX, worldUpY, worldUpZ), up(worldUpX, worldUpY, worldUpZ), front(0.0f, 0.0f, -1.0f) {}
+		float worldUpX, float worldUpY, float worldUpZ,
+		float nearPlane = DEFAULT_NEAR_PLANE, float farPlane = DEFAULT_FAR_PLANE)
+		: transform(glm::vec3(posX, posY, posZ), glm::vec3(rotX, rotY, rotZ)), worldUp(worldUpX, worldUpY, worldUpZ), up(worldUpX, worldUpY, worldUpZ), front(0.0f, 0.0f, -1.0f), _nearPlane(nearPlane), _farPlane(farPlane) {}
 public:
 	Transform transform;
 	glm::vec3 front;
@@ -41,9 +52,22 @@ public:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 
-	float keyYaw;
-	float keyPitch;
-
 	virtual glm::mat4 getViewMatrix() = 0;
 	virtual glm::mat4 getProjectionMatrix(float aspectRatio, float nearPlane, float farPlane) = 0;
+
+	float getNearPlane() {
+		return _nearPlane;
+	}
+
+	void setNearPlane(float nearPlane) {
+		_nearPlane = nearPlane;
+	}
+
+	float getFarPlane() {
+		return _farPlane;
+	}
+
+	void setFarPlane(float farPlane) {
+		_farPlane = farPlane;
+	}
 };

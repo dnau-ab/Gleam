@@ -21,7 +21,7 @@ void Viewport::render() {
 }
 
 void Viewport::renderGeometry(float aspectRatio) {
-	glm::mat4 projection = camera->getProjectionMatrix(aspectRatio, 0.1f, 1000.0f);
+	glm::mat4 projection = camera->getProjectionMatrix(aspectRatio, camera->getNearPlane(), camera->getFarPlane());
 	glm::mat4 view = camera->getViewMatrix();
 
 	for (Renderable*& renderable : scene->getRenderables()) {
