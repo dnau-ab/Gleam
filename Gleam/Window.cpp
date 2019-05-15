@@ -275,7 +275,7 @@ void Window::update() {
 
 		// geometry pass
 		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
-		glViewport(0, 0, renderSize.x, renderSize.y);
+		glViewport(0, 0, (GLsizei)renderSize.x, (GLsizei)renderSize.y);
 		glScissor(0, 0, renderSize.x, renderSize.y);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -316,7 +316,7 @@ void Window::update() {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 													   // blit to default framebuffer
 			if (_aspectMode == AspectMode::STRETCH) {
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+				glBlitFramebuffer(0, 0, (GLint)renderSize.x, (GLint)renderSize.y, 0, 0, (GLint)_windowSize.x, (GLint)_windowSize.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
 			else {
@@ -336,7 +336,7 @@ void Window::update() {
 				glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
 				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 														   // blit to default framebuffer
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0 + diff, 0, _windowSize.x - diff, _windowSize.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+				glBlitFramebuffer(0, 0, (GLint)renderSize.x, (GLint)renderSize.y, 0 + diff, 0, (GLint)_windowSize.x - diff, (GLint)_windowSize.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 			}
 			else {
 				// clamp y

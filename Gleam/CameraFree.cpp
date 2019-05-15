@@ -11,38 +11,7 @@ void CameraFree::updateCameraVectors()
 // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
 void CameraFree::processKeyboard(Camera_Movement direction, float deltaTime)
 {
-	float velocity = movementSpeed * deltaTime;
-	//printf("DIR: %f\nV: %f\nMVS: %f\nDT: %f\n\n", front * velocity, velocity, movementSpeed, deltaTime);
-	if (direction == FORWARD) {
-		transform.translate(front * velocity);
-	}
-	if (direction == BACKWARD) {
-		transform.translate(-(front * velocity));
-	}
-	if (direction == LEFT) {
-		transform.translate(-(right * velocity));
-	}
-	if (direction == RIGHT) {
-		transform.translate(right * velocity);
-	}
-	if (direction == UP) {
-		transform.translate(up * velocity);
-	}
-	if (direction == DOWN) {
-		transform.translate(-(up * velocity));
-	}
-	if (direction == ROLL_LEFT) {
-		glm::quat rollQuat = glm::angleAxis(-200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::quat keyQuat = rollQuat * transform.getRotation();
-		transform.setRotation(keyQuat);
-		updateCameraVectors();
-	}
-	if (direction == ROLL_RIGHT) {
-		glm::quat rollQuat = glm::angleAxis(200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::quat keyQuat = rollQuat * transform.getRotation();
-		transform.setRotation(keyQuat);
-		updateCameraVectors();
-	}
+
 }
 
 // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
@@ -85,4 +54,41 @@ glm::mat4 CameraFree::getViewMatrix() {
 
 glm::mat4 CameraFree::getProjectionMatrix(float aspectRatio, float nearPlane, float farPlane) {
 	return glm::perspective(glm::radians(zoom), aspectRatio, nearPlane, farPlane);
+}
+
+void CameraFree::update(float deltaTime) {
+	float velocity = movementSpeed * deltaTime;
+	//printf("DIR: %f\nV: %f\nMVS: %f\nDT: %f\n\n", front * velocity, velocity, movementSpeed, deltaTime);
+	if (movementVector) {
+		if (movementVector & FORWARD) {
+			transform.translate(front * velocity);
+		}
+		if (movementVector & BACKWARD) {
+			transform.translate(-(front * velocity));
+		}
+		if (movementVector & LEFT) {
+			transform.translate(-(right * velocity));
+		}
+		if (movementVector & RIGHT) {
+			transform.translate(right * velocity);
+		}
+		if (movementVector & UP) {
+			transform.translate(up * velocity);
+		}
+		if (movementVector & DOWN) {
+			transform.translate(-(up * velocity));
+		}
+		if (movementVector & ROLL_LEFT) {
+			glm::quat rollQuat = glm::angleAxis(-200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+			glm::quat keyQuat = rollQuat * transform.getRotation();
+			transform.setRotation(keyQuat);
+			updateCameraVectors();
+		}
+		if (movementVector & ROLL_RIGHT) {
+			glm::quat rollQuat = glm::angleAxis(200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
+			glm::quat keyQuat = rollQuat * transform.getRotation();
+			transform.setRotation(keyQuat);
+			updateCameraVectors();
+		}
+	}
 }
