@@ -18,6 +18,7 @@ private:
 
 	void load(const std::string& path, const std::string& type);
 public:
+	static unsigned int loadCubemap(std::vector<std::string> faces);
 	static unsigned int getDefaultID();
 	static std::vector<Texture> loaded;
 	

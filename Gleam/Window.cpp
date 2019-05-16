@@ -65,6 +65,61 @@ void Window::initBackend() {
 #endif
 }
 
+void Window::initLBuffer() {
+	_remakeFrameBuffer = false;
+
+	if (_lBuffer > 0) {
+		// delete and recreate buffer/textures
+		glDeleteBuffers(1, &_lBuffer);
+		glDeleteTextures(1, &_lColor);
+	}
+
+	glm::vec<2, unsigned> size;
+	if (_aspectMode == AspectMode::FREE) {
+		size = _windowSize;
+	}
+	else {
+		size = _resolution;
+	}
+
+	glGenFramebuffers(1, &_lBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, _lBuffer);
+	// color + specular color buffer
+	glGenTextures(1, &_lColor);
+	glBindTexture(GL_TEXTURE_2D, _lColor);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _lColor, 0);
+
+	// add attachments to framebuffer 
+	unsigned int attachments[1] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, attachments);
+
+	// create and attach depth buffer
+	unsigned int rboDepth;
+	glGenRenderbuffers(1, &rboDepth);
+	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH32F_STENCIL8, size.x, size.y);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+
+	// check that framebuffer is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cout << "WINDOW::Lighting framebuffer not complete!" << std::endl;
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, _lBuffer);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glStencilMask(0x00);
+	glViewport(0, 0, size.x, size.y);
+	glScissor(0, 0, size.x, size.y);
+	_screenQuad->render(glm::mat4(1.0f), glm::mat4(1.0));
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glFinish();
+}
+
 void Window::initGBuffer() {
 	_remakeFrameBuffer = false;
 
@@ -250,6 +305,7 @@ void Window::update() {
 
 		if (_remakeFrameBuffer) {
 			initGBuffer();
+			initLBuffer();
 		}
 
 		float aspectRatio;
@@ -264,8 +320,6 @@ void Window::update() {
 			aspectRatio = _resolution.x / (float)_resolution.y;
 		}
 
-		
-
 		// render
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, _windowSize.x, _windowSize.y);
@@ -277,11 +331,15 @@ void Window::update() {
 		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
 		glViewport(0, 0, renderSize.x, renderSize.y);
 		glScissor(0, 0, renderSize.x, renderSize.y);
+		
+		glColorMask(true, true, true, true);
+		glDepthMask(true);
+		glStencilMask(0xFF);
+		glStencilFunc(GL_ALWAYS, 1, 0xFF);
+
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0xFF);
 		glm::vec2 vpPos;
 		glm::vec2 vpSize;
 		glm::vec<4, int> dimensions;
@@ -307,51 +365,19 @@ void Window::update() {
 		glBindTexture(GL_TEXTURE_2D, _gNormal);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, _gColorSpec);
+		
+		// bind lighting framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, _lBuffer);
+		glViewport(0, 0, renderSize.x, renderSize.y);
+		glScissor(0, 0, renderSize.x, renderSize.y);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		if (_aspectMode == AspectMode::STRETCH || _aspectMode == AspectMode::FREE) {
-			glViewport(0, 0, _windowSize.x, _windowSize.y);
-			glScissor(0, 0, _windowSize.x, _windowSize.y);
-			// move stencil data from framebuffer to screenbuffer
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-													   // blit to default framebuffer
-			if (_aspectMode == AspectMode::STRETCH) {
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			}
-			else {
-				glBlitFramebuffer(0, 0, _windowSize.x, _windowSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			}
-		}
-		else {
-			float windowAspect = _windowSize.x / (float)_windowSize.y;
-			unsigned int diff = 0;
-			if (_aspectRatio - windowAspect < 0.0) {
-				// clamp x
-				diff = (unsigned)(glm::abs(_windowSize.x - _windowSize.y * _aspectRatio) / 2.0f);
-				glViewport(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
-				glScissor(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
-				// move stencil data from framebuffer to screenbuffer
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-														   // blit to default framebuffer
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0 + diff, 0, _windowSize.x - diff, _windowSize.y, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-			}
-			else {
-				// clamp y
-				diff = (unsigned)(glm::abs(_windowSize.y - _windowSize.x * (1 / _aspectRatio)) / 2.0f);
-				glViewport(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
-				glScissor(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
-				// move stencil data from framebuffer to screenbuffer
-				glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
-				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-														   // blit to default framebuffer
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0 + diff, _windowSize.x, _windowSize.y - diff, GL_STENCIL_BUFFER_BIT, GL_NEAREST);
-			}
-		}
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _lBuffer); // write to lighting framebuffer
 
-		glBindBuffer(GL_FRAMEBUFFER, 0);
+		// blit to default framebuffer
+		glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, renderSize.x, renderSize.y, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 		glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
 		for (Viewport*& viewport : _viewports) {
@@ -359,11 +385,29 @@ void Window::update() {
 			// render quad
 			_screenQuad->render(glm::mat4(1.0f), glm::mat4(1.0f));
 		}
+
+		for (Viewport*& viewport : _viewports) {
+
+			vpPos = viewport->getPosition();
+			vpSize = viewport->getSize();
+
+			dimensions.x = (int)(vpPos.x * renderSize.x);
+			dimensions.y = (int)(vpPos.y * renderSize.y);
+			dimensions.z = (int)(vpSize.x * renderSize.x);
+			dimensions.w = (int)(vpSize.y * renderSize.y);
+
+			glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+			glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+
+			viewport->renderSkybox(aspectRatio);
+		}
+
 		// copy geometry's depth buffer to default framebuffer's depth buffer
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _lBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+
 		// blit to default framebuffer
-		glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		if (_window != nullptr) {

@@ -18,6 +18,8 @@
 #include "DirectionalLight.h"
 #include "SpotLight.h"
 
+#include "Skybox.h"
+
 #include <glm/glm.hpp>
 
 class Viewport {
@@ -25,6 +27,7 @@ protected:
 	glm::vec2 _position;
 	glm::vec2 _size;
 	Shader _lightingShader;
+	Skybox* _skybox;
 
 	unsigned int _gBuffer = 0;
 	unsigned int _gPosition = 0;
@@ -49,7 +52,10 @@ public:
 	void setPosition(glm::vec2 position);
 	void setSize(glm::vec2 size);
 
-	void render();
+	Skybox* getSkybox();
+	void setSkybox(Skybox* skybox);
+
+	void renderSkybox(float aspectRatio);
 	void renderGeometry(float aspectRatio);
 	void renderLighting();
 };

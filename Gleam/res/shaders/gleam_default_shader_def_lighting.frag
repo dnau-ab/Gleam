@@ -18,6 +18,7 @@ struct PointLight {
 	float constant;
 	float linear;
 	float quadratic;
+	float radius;
 };
 #define NUM_POINT_LIGHTS 32
 uniform PointLight pointLights[NUM_POINT_LIGHTS];
@@ -39,22 +40,30 @@ uniform int numDirectionalLights;
 uniform int numSpotLights;
 
 vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 diffuse, float specular) {
-
-	vec3 lightDir = normalize(light.position - fragPos);
-
-	// diffuse lighting
-	float diff = max(dot(normal, lightDir), 0.0);
 	
-	// specular lighting
-	// Blinn-Phong
-	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(normal, halfwayDir), 0.0), 16);
-
 	vec3 Ambient = light.ambient * diffuse;
-	vec3 Diffuse = light.diffuse * diff * diffuse;
-	vec3 Specular = light.specular * spec * specular;
+	
+	float distance = length(light.position - fragPos);
+	if (distance < light.radius) {
+		vec3 lightDir = normalize(light.position - fragPos);
 
-	return (Ambient + Diffuse + Specular);
+		// diffuse lighting
+		float diff = max(dot(normal, lightDir), 0.0);
+		
+		// specular lighting
+		// Blinn-Phong
+		vec3 halfwayDir = normalize(lightDir + viewDir);
+		float spec = pow(max(dot(normal, halfwayDir), 0.0), 16);
+
+		float attenuation = 1.0 / (1.0 + light.linear * distance + light.quadratic * distance * distance);
+		
+		vec3 Diffuse = light.diffuse * diff * diffuse;
+		vec3 Specular = light.specular * spec * specular;
+		
+		return Ambient + (Diffuse + Specular) * attenuation;
+	}
+	
+	return Ambient;
 }
 
 vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 diffuse, float specular) {
@@ -97,5 +106,5 @@ void main() {
 
 	vec3 result = lighting + (directional + point);
 
-	fragColor = vec4(result, 1.0);
+	fragColor = vec4(diffuse * 0.5 + result, 1.0);
 } 

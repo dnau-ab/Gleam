@@ -36,8 +36,12 @@ private:
 	unsigned int _gNormal = 0;
 	unsigned int _gColorSpec = 0;
 
+	unsigned int _lBuffer = 0;
+	unsigned int _lColor = 0;
+
 	std::unique_ptr<Quad> _screenQuad = nullptr;
 
+	void initLBuffer();
 	void initGBuffer();
 
 protected:

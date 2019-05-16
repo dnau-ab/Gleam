@@ -16,17 +16,35 @@ void Viewport::setSize(glm::vec2 size) {
 	_size = size;
 }
 
-void Viewport::render() {
+Skybox* Viewport::getSkybox() {
+	return _skybox;
+}
 
+void Viewport::setSkybox(Skybox* skybox) {
+	_skybox = skybox;
+}
+
+void Viewport::renderSkybox(float aspectRatio) {
+	glm::mat4 projection = camera->getProjectionMatrix(aspectRatio, camera->getNearPlane(), camera->getFarPlane());
+	glm::mat4 view = camera->getViewMatrix();
+	
+	glStencilMask(0x00);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
+	if (_skybox != nullptr) {
+		_skybox->render(projection, view);
+	}
 }
 
 void Viewport::renderGeometry(float aspectRatio) {
 	glm::mat4 projection = camera->getProjectionMatrix(aspectRatio, camera->getNearPlane(), camera->getFarPlane());
 	glm::mat4 view = camera->getViewMatrix();
 
+	glStencilMask(0xFF);
+	glStencilFunc(GL_ALWAYS, 1, 0xFF);
 	for (Renderable*& renderable : scene->getRenderables()) {
 		renderable->render(projection, view);
 	}
+
 }
 
 void Viewport::renderLighting() {
@@ -52,6 +70,8 @@ void Viewport::renderLighting() {
 
 		PointLight* pl = dynamic_cast<PointLight*>(lights[i]);
 		if (pl != nullptr) {
+			float maxBrightness = std::fmaxf(std::fmaxf(pl->diffuse.r, pl->diffuse.g), pl->diffuse.b);
+			float radius = (-pl->linear + std::sqrt(pl->linear * pl->linear - 4 * pl->quadratic * (pl->constant - (256.0f / 5.0f) * maxBrightness))) / (2.0f * pl->quadratic);
 			_lightingShader->setVec3("pointLights[" + std::to_string(numPointLights) + "].ambient", pl->ambient);
 			_lightingShader->setVec3("pointLights[" + std::to_string(numPointLights) + "].diffuse", pl->diffuse);
 			_lightingShader->setVec3("pointLights[" + std::to_string(numPointLights) + "].specular", pl->specular);
@@ -61,6 +81,7 @@ void Viewport::renderLighting() {
 			_lightingShader->setFloat("pointLights[" + std::to_string(numPointLights) + "].constant", pl->constant);
 			_lightingShader->setFloat("pointLights[" + std::to_string(numPointLights) + "].linear", pl->linear);
 			_lightingShader->setFloat("pointLights[" + std::to_string(numPointLights) + "].quadratic", pl->quadratic);
+			_lightingShader->setFloat("pointLights[" + std::to_string(numPointLights) + "].radius", radius);
 			numPointLights++;
 			continue;
 		}
