@@ -376,7 +376,7 @@ void Window::update() {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _lBuffer); // write to lighting framebuffer
 
-		// blit to default framebuffer
+		// blit to lighting framebuffer
 		glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, renderSize.x, renderSize.y, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 		glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
@@ -406,8 +406,39 @@ void Window::update() {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _lBuffer);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
 
+		if (_aspectMode == AspectMode::STRETCH || _aspectMode == AspectMode::FREE) {
+			glViewport(0, 0, _windowSize.x, _windowSize.y);
+			glScissor(0, 0, _windowSize.x, _windowSize.y);
+
+			if (_aspectMode == AspectMode::STRETCH) {
+				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+			}
+			else {
+				glBlitFramebuffer(0, 0, _windowSize.x, _windowSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+			}
+		}
+		else {
+			float windowAspect = _windowSize.x / (float)_windowSize.y;
+			unsigned int diff = 0;
+			if (_aspectRatio - windowAspect < 0.0) {
+				// clamp x
+				diff = (unsigned)(glm::abs(_windowSize.x - _windowSize.y * _aspectRatio) / 2.0f);
+				glViewport(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
+				glScissor(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
+
+				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0 + diff, 0, _windowSize.x - diff, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+			}
+			else {
+				// clamp y
+				diff = (unsigned)(glm::abs(_windowSize.y - _windowSize.x * (1 / _aspectRatio)) / 2.0f);
+				glViewport(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
+				glScissor(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
+
+				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0 + diff, _windowSize.x, _windowSize.y - diff, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+			}
+		}
+
 		// blit to default framebuffer
-		glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		if (_window != nullptr) {
