@@ -61,13 +61,18 @@ int main() {
 	window.scrollCallback = scrollHandler;
 
 	std::shared_ptr<Mesh> variaMesh = MeshLoader::loadMesh("res/models/variasuit/", "DolBarriersuit.obj", true);
+	//std::shared_ptr<Mesh> variaMesh = MeshLoader::loadMesh("res/models/bulbasaur/", "Pokemon.obj", true);
+	if (variaMesh) {
+		std::cout << variaMesh.get()->numOfSubMeshes() << std::endl;
+	}
 	Shader* shader = Shader::getDefault();
 	Scene scene;
 	Scene aScene;
 	unsigned radius = 30;
 	unsigned numSami = 6;
-	for (int i = 0; i < numSami; i++) {
+	for (int i = 0; i < (int)numSami; i++) {
 		Model* varia = new Model(variaMesh, shader);
+		//varia->transform.scale({ 20.1f, 20.1f, 20.1f });
 		varia->transform.translate(glm::vec3(radius * glm::cos(glm::radians(i * (360.0f / numSami))), 0.0f, radius * glm::sin(glm::radians(i * (360.0f / numSami)))));
 		varia->transform.rotate(glm::vec3(0.0f, -i * (360.0f / numSami) + 90.0f, 0.0f));
 		scene.addRenderable(varia);
@@ -103,10 +108,23 @@ int main() {
 	cylinder.transform.translate({ 0, 11, 0 });
 	scene.addRenderable(&cylinder);
 	
-	Viewport view(0, 0, WIDTH / SCALE, HEIGHT / SCALE);
+	Viewport view(0, 0, 1.0f, 1.0f);
 	view.scene = &scene;
 	view.camera = &camera;
 
+	Shader skyboxShader("res/shaders/gleam_default_skybox_shader.vert", "res/shaders/gleam_default_skybox_shader.frag");
+	std::vector<std::string> faces{
+			"res/arrakisday_rt.tga",
+			"res/arrakisday_lf.tga",
+			"res/arrakisday_up.tga",
+			"res/arrakisday_dn.tga",
+			"res/arrakisday_ft.tga",
+			"res/arrakisday_bk.tga"
+	};
+	Skybox skybox(faces, &skyboxShader);
+	view.setSkybox(&skybox);
+
+	/*
 	constexpr float numHorz = 1;
 	constexpr float numVert = 1;
 	const float vWidth = 1.0f / numHorz;
@@ -125,13 +143,8 @@ int main() {
 		viewport->camera = &camera;
 		window.addViewport(viewport.get());
 	}
-
-	//window.removeViewport(viewports[0].get());
-	//window.removeViewport(viewports[1].get());
-	//window.removeViewport(viewports[2].get());
-	//window.removeViewport(viewports[3].get());
-
-	//window.addViewport(&view);
+	*/
+	window.addViewport(&view);
 
 	DirectionalLight dLight({ 0.2f, 0.2f, 0.2f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f }, { 5, 5, 5 });
 	scene.addLight(&dLight);
@@ -139,43 +152,13 @@ int main() {
 	PointLight pLight({ 0.1, 0.1, 0.1 }, { 1, 0.5, 0.2 }, { 0.2, 0.2, 0.2 }, 0, 0, 0, { 5, 5, 5 });
 	scene.addLight(&pLight);
 
-	aScene = scene;
-	scene.removeLight(&pLight);
-	scene.removeLight(&dLight);
-	viewports[0]->scene = &aScene;
-
 	while (!window.shouldClose()) {
 		float deltaTime = (float)window.getDeltaTime();
 		float time = (float)glfwGetTime();
 
-		if (movement) {
-			if (movement & Camera_Movement::FORWARD) {
-				camera.processKeyboard(Camera_Movement::FORWARD, deltaTime);
-			}
-			if (movement & Camera_Movement::BACKWARD) {
-				camera.processKeyboard(Camera_Movement::BACKWARD, deltaTime);
-			}
-			if (movement & Camera_Movement::LEFT) {
-				camera.processKeyboard(Camera_Movement::LEFT, deltaTime);
-			}
-			if (movement & Camera_Movement::RIGHT) {
-				camera.processKeyboard(Camera_Movement::RIGHT, deltaTime);
-			}
-			if (movement & Camera_Movement::UP) {
-				camera.processKeyboard(Camera_Movement::UP, deltaTime);
-			}
-			if (movement & Camera_Movement::DOWN) {
-				camera.processKeyboard(Camera_Movement::DOWN, deltaTime);
-			}
-			if (movement & Camera_Movement::ROLL_LEFT) {
-				camera.processKeyboard(Camera_Movement::ROLL_LEFT, deltaTime);
-			}
-			if (movement & Camera_Movement::ROLL_RIGHT) {
-				camera.processKeyboard(Camera_Movement::ROLL_RIGHT, deltaTime);
-			}
-		}
+		camera.update(deltaTime);
 
-		pLight.position = glm::vec3(sin(time) * (radius+5), 5, cos(time) * (radius+5));
+		pLight.position = glm::vec3(sin(time) * (radius+5), 6 + 5 * sin(time), cos(time) * (radius+5));
 
 		cube.transform.rotate({ 0, 50 * window.getDeltaTime(), 0 });
 		sphere.transform.rotate({ 0, 60 * window.getDeltaTime(), 0 });
@@ -208,28 +191,28 @@ void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // point mode
 			break;
 		case GLFW_KEY_W:
-			movement |= Camera_Movement::FORWARD;
+			camera.setMovement(Camera_Movement::FORWARD);
 			break;
 		case GLFW_KEY_S:
-			movement |= Camera_Movement::BACKWARD;
+			camera.setMovement(Camera_Movement::BACKWARD);
 			break;
 		case GLFW_KEY_A:
-			movement |= Camera_Movement::LEFT;
+			camera.setMovement(Camera_Movement::LEFT);
 			break;
 		case GLFW_KEY_D:
-			movement |= Camera_Movement::RIGHT;
+			camera.setMovement(Camera_Movement::RIGHT);
 			break;
 		case GLFW_KEY_SPACE:
-			movement |= Camera_Movement::UP;
+			camera.setMovement(Camera_Movement::UP);
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
-			movement |= Camera_Movement::DOWN;
+			camera.setMovement(Camera_Movement::DOWN);
 			break;
 		case GLFW_KEY_Q:
-			movement |= Camera_Movement::ROLL_LEFT;
+			camera.setMovement(Camera_Movement::ROLL_LEFT);
 			break;
 		case GLFW_KEY_E:
-			movement |= Camera_Movement::ROLL_RIGHT;
+			camera.setMovement(Camera_Movement::ROLL_RIGHT);
 			break;
 		case GLFW_KEY_1:
 			window->setCursorMode(GLFW_CURSOR_DISABLED);
@@ -258,28 +241,28 @@ void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 	else if (action == GLFW_RELEASE) {
 		switch (key) {
 		case GLFW_KEY_W:
-			movement &= ~Camera_Movement::FORWARD;
+			camera.unsetMovement(Camera_Movement::FORWARD);
 			break;
 		case GLFW_KEY_S:
-			movement &= ~Camera_Movement::BACKWARD;
+			camera.unsetMovement(Camera_Movement::BACKWARD);
 			break;
 		case GLFW_KEY_A:
-			movement &= ~Camera_Movement::LEFT;
+			camera.unsetMovement(Camera_Movement::LEFT);
 			break;
 		case GLFW_KEY_D:
-			movement &= ~Camera_Movement::RIGHT;
+			camera.unsetMovement(Camera_Movement::RIGHT);
 			break;
 		case GLFW_KEY_SPACE:
-			movement &= ~Camera_Movement::UP;
+			camera.unsetMovement(Camera_Movement::UP);
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
-			movement &= ~Camera_Movement::DOWN;
+			camera.unsetMovement(Camera_Movement::DOWN);
 			break;
 		case GLFW_KEY_Q:
-			movement &= ~Camera_Movement::ROLL_LEFT;
+			camera.unsetMovement(Camera_Movement::ROLL_LEFT);
 			break;
 		case GLFW_KEY_E:
-			movement &= ~Camera_Movement::ROLL_RIGHT;
+			camera.unsetMovement(Camera_Movement::ROLL_RIGHT);
 			break;
 		}
 	}
@@ -289,7 +272,6 @@ void mouseHandler(Window* window, double xPos, double yPos) {
 	static double lastX = xPos, lastY = yPos;
 
 	if (!cameraEnabled) return;
-	printf("X: %f\nY: %f\n\n", xPos - lastX, yPos - lastY);
 	camera.processMouseMovement((float)(xPos - lastX), (float)(yPos - lastY));
 
 	lastX = xPos;
@@ -297,8 +279,8 @@ void mouseHandler(Window* window, double xPos, double yPos) {
 }
 
 void scrollHandler(Window* window, double xOffset, double yOffset) {
-	float deltaResolution = 0.1f * SCALE * yOffset;
+	float deltaResolution = 0.1f * SCALE * (float)yOffset;
 	SCALE += deltaResolution;
 
-	window->setResolution(WIDTH / SCALE, HEIGHT / SCALE);
+	window->setResolution((unsigned int)(WIDTH / SCALE), (unsigned int)(HEIGHT / SCALE));
 }

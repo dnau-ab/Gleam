@@ -329,7 +329,7 @@ void Window::update() {
 
 		// geometry pass
 		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
-		glViewport(0, 0, renderSize.x, renderSize.y);
+		glViewport(0, 0, (GLsizei)renderSize.x, (GLsizei)renderSize.y);
 		glScissor(0, 0, renderSize.x, renderSize.y);
 		
 		glColorMask(true, true, true, true);

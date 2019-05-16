@@ -8,7 +8,7 @@ private:
 	static constexpr float ZOOM = 45.0f;
 
 	// Calculates the front vector from the Camera's (updated) Euler Angles
-	void updateCameraVectors();
+	void updateCameraVectors() override;
 
 public:
 	CameraFree(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -30,6 +30,8 @@ public:
 	void processMouseMovement(float xoffset, float yoffset);
 	void processMouseScroll(float yoffset);
 	
+	void update(float deltaTime) override;
+
 	// Camera options
 	float movementSpeed;
 	float mouseSensitivity;
