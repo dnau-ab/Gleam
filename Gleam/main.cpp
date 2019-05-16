@@ -82,13 +82,27 @@ int main() {
 	samus.transform.scale({ 0.25, 0.25, 0.25 });
 	samus.transform.translate({ 0, 15, 0 });
 	scene.addRenderable(&samus);
+	/*
+	Model battlefield(MeshLoader::loadMesh("res/models/Bob-omb Battlefield", "Bob-omb Battlefield.obj"));
+	battlefield.transform.scale({ 100, 100, 100 });
+	scene.addRenderable(&battlefield);
+	*/
+	std::shared_ptr<Mesh> squirtleMesh = MeshLoader::loadMesh("res/models/Squirtle", "Squirtle.fbx");
+	Model squirtle(squirtleMesh);
+	squirtle.transform.rotate({ 90, 0, 0 });
+	scene.addRenderable(&squirtle);
+
+	Model joker(MeshLoader::loadMesh("res/models/Joker", "Morgana Car.fbx"));
+	joker.transform.rotate({ 90, 0, 0 });
+	joker.transform.translate({ 15, 0, 15 });
+	scene.addRenderable(&joker);
 
 	// add floor quad
 	Quad* quad = new Quad(Shader::getDefault());
 	quad->transform.translate({ 0, -0.1, 0 });
 	quad->transform.scale({ 100000, 100000, 1 });
 	quad->transform.rotate({ -90, 0, 0 });
-	scene.addRenderable(quad);
+	//scene.addRenderable(quad);
 
 	Cube cube;
 	cube.transform.translate({ 0, 2.5, 0 });
@@ -102,31 +116,39 @@ int main() {
 	
 	Cone cone;
 	cone.transform.translate({ 0, 8, 0 });
+	cone.material.setBaseColor({ 1.0f, 0.0f, 1.0f });
 	scene.addRenderable(&cone);
 
 	Cylinder cylinder;
 	cylinder.transform.translate({ 0, 11, 0 });
 	scene.addRenderable(&cylinder);
 	
-	Viewport view(0, 0, 1.0f, 1.0f);
-	view.scene = &scene;
-	view.camera = &camera;
+	Viewport left(0, 0, 0.5f, 1.0f);
+	left.scene = &scene;
+	left.camera = &camera;
+
+	Viewport right(0.5f, 0, 0.5f, 1.0f);
+	right.scene = &scene;
+	right.camera = &camera;
+	Shader customLighting("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/custom/shader_def_lighting.frag");
+	right.setLightingShader(&customLighting);
 
 	Shader skyboxShader("res/shaders/gleam_default_skybox_shader.vert", "res/shaders/gleam_default_skybox_shader.frag");
 	std::vector<std::string> faces{
-			"res/arrakisday_rt.tga",
-			"res/arrakisday_lf.tga",
+			"res/arrakisday_ft.tga",
+			"res/arrakisday_bk.tga",
 			"res/arrakisday_up.tga",
 			"res/arrakisday_dn.tga",
-			"res/arrakisday_ft.tga",
-			"res/arrakisday_bk.tga"
+			"res/arrakisday_rt.tga",
+			"res/arrakisday_lf.tga"
 	};
 	Skybox skybox(faces, &skyboxShader);
-	view.setSkybox(&skybox);
+	left.setSkybox(&skybox);
+	right.setSkybox(&skybox);
 
-	/*
-	constexpr float numHorz = 1;
-	constexpr float numVert = 1;
+	
+	constexpr float numHorz = 3;
+	constexpr float numVert = 3;
 	const float vWidth = 1.0f / numHorz;
 	const float vHeight = 1.0f / numVert;
 	std::vector<std::unique_ptr<Viewport> > viewports;
@@ -142,14 +164,20 @@ int main() {
 		viewport->scene = &scene;
 		viewport->camera = &camera;
 		window.addViewport(viewport.get());
+		viewport->setSkybox(&skybox);
 	}
-	*/
-	window.addViewport(&view);
+	
+	viewports[4]->setLightingShader(&customLighting);
+
+	//window.addViewport(&left);
+	//window.addViewport(&right);
 
 	DirectionalLight dLight({ 0.2f, 0.2f, 0.2f }, { 0.5f, 0.5f, 0.5f }, { 1.0f, 1.0f, 1.0f }, { 5, 5, 5 });
 	scene.addLight(&dLight);
 
-	PointLight pLight({ 0.1, 0.1, 0.1 }, { 1, 0.5, 0.2 }, { 0.2, 0.2, 0.2 }, 0, 0, 0, { 5, 5, 5 });
+	Sphere lightSphere;
+	scene.addRenderable(&lightSphere);
+	PointLight pLight({ 0.1, 0.1, 0.1 }, { 1, 0.5, 0.2 }, { 0.2, 0.2, 0.2 }, 0.0014f, 0.000007f, 1.0f, { 0, 0, 0 });
 	scene.addLight(&pLight);
 
 	while (!window.shouldClose()) {
@@ -158,7 +186,8 @@ int main() {
 
 		camera.update(deltaTime);
 
-		pLight.position = glm::vec3(sin(time) * (radius+5), 6 + 5 * sin(time), cos(time) * (radius+5));
+		pLight.position = glm::vec3(sin(time) * (radius+5), 5, cos(time) * (radius+5));
+		lightSphere.transform.setPosition(pLight.position);
 
 		cube.transform.rotate({ 0, 50 * window.getDeltaTime(), 0 });
 		sphere.transform.rotate({ 0, 60 * window.getDeltaTime(), 0 });
@@ -169,6 +198,8 @@ int main() {
 		
 		float scale = 1 + sin(time) * 0.5f;
 		cube.transform.setScale({ scale, scale, scale });
+
+		cone.material.setBaseColor({ 1.0f, sin(time) * 0.5f + 0.5f, 1.0f });
 
 		dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
 		window.update();

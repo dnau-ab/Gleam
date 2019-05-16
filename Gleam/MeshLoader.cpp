@@ -7,7 +7,7 @@ std::shared_ptr<Mesh> MeshLoader::loadMesh(const std::string& directory, const s
 		std::cout << "LOADER::Loading " << fileName << " from " << directory << std::endl;
 		Assimp::Importer importer;
 		std::string path = directory == "" ? fileName : (directory + "/" + fileName);
-		const aiScene* scene = importer.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+		const aiScene* scene = importer.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_PreTransformVertices);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 			std::cout << "ERROR::LOADER::LOAD OBJECT::ASSIMP::" << importer.GetErrorString() << std::endl;

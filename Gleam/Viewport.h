@@ -23,6 +23,16 @@
 #include <glm/glm.hpp>
 
 class Viewport {
+private:
+	glm::vec4 getDimensions(glm::vec2 renderSize) {
+		glm::vec4 dimensions;
+		dimensions.x = (int)(_position.x * renderSize.x);
+		dimensions.y = (int)(_position.y * renderSize.y);
+		dimensions.z = (int)(_size.x * renderSize.x);
+		dimensions.w = (int)(_size.y * renderSize.y);
+		return dimensions;
+	}
+
 protected:
 	glm::vec2 _position;
 	glm::vec2 _size;
@@ -55,7 +65,10 @@ public:
 	Skybox* getSkybox();
 	void setSkybox(Skybox* skybox);
 
-	void renderSkybox(float aspectRatio);
-	void renderGeometry(float aspectRatio);
-	void renderLighting();
+	Shader* getLightingShader();
+	void setLightingShader(Shader* shader);
+
+	void renderSkybox(glm::vec2 renderSize);
+	void renderGeometry(glm::vec2 renderSize);
+	void renderLighting(glm::vec2 renderSize);
 };

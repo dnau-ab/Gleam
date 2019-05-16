@@ -21,6 +21,9 @@ uniform Material material;
 void main() {
 	gPosition = fragPos;
 	gNormal = normalize(normal);
-	gColorSpec.rgb = texture(material.diffuse1, texCoord).rgb;
-	gColorSpec.a = 0.1f;//texture(material.specular1, texCoord).r;
+	vec4 color = texture(material.diffuse1, texCoord);
+	if (color.a < 0.25)
+		discard;
+	gColorSpec.rgb = color.rgb;
+	gColorSpec.a = texture(material.specular1, texCoord).r;
 } 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <stb_image.h>
 
 #include <string>
@@ -20,6 +21,7 @@ private:
 public:
 	static unsigned int loadCubemap(std::vector<std::string> faces);
 	static unsigned int getDefaultID();
+	static unsigned int getColorTextureID(glm::vec3 color);
 	static std::vector<Texture> loaded;
 	
 	Texture();

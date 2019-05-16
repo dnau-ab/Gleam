@@ -53,7 +53,7 @@ vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 		// specular lighting
 		// Blinn-Phong
 		vec3 halfwayDir = normalize(lightDir + viewDir);
-		float spec = pow(max(dot(normal, halfwayDir), 0.0), 16);
+		float spec = pow(max(dot(normal, halfwayDir), 0.0), int(specular));
 
 		float attenuation = 1.0 / (1.0 + light.linear * distance + light.quadratic * distance * distance);
 		
@@ -75,7 +75,7 @@ vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
 	
 	// specular
 	vec3 reflectDir = reflect(-lightDir, normal);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), int(specular));
 
 	vec3 Ambient = light.ambient * diffuse;
 	vec3 Diffuse = light.diffuse * diff * diffuse;

@@ -308,16 +308,13 @@ void Window::update() {
 			initLBuffer();
 		}
 
-		float aspectRatio;
 		glm::vec2 renderSize;
 
 		if (_aspectMode == AspectMode::FREE) {
 			renderSize = _windowSize;
-			aspectRatio = _windowSize.x / (float)_windowSize.y;
 		}
 		else {
 			renderSize = _resolution;
-			aspectRatio = _resolution.x / (float)_resolution.y;
 		}
 
 		// render
@@ -345,17 +342,7 @@ void Window::update() {
 		glm::vec<4, int> dimensions;
 
 		for (Viewport*& viewport : _viewports) {
-			vpPos = viewport->getPosition();
-			vpSize = viewport->getSize();
-
-			dimensions.x = (int)(vpPos.x * renderSize.x);
-			dimensions.y = (int)(vpPos.y * renderSize.y);
-			dimensions.z = (int)(vpSize.x * renderSize.x);
-			dimensions.w = (int)(vpSize.y * renderSize.y);
-
-			glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
-			glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
-			viewport->renderGeometry(aspectRatio);
+			viewport->renderGeometry(renderSize);
 		}
 
 		// lighting pass
@@ -381,25 +368,13 @@ void Window::update() {
 		glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
 		for (Viewport*& viewport : _viewports) {
-			viewport->renderLighting();
+			viewport->renderLighting(renderSize);
 			// render quad
 			_screenQuad->render(glm::mat4(1.0f), glm::mat4(1.0f));
 		}
 
 		for (Viewport*& viewport : _viewports) {
-
-			vpPos = viewport->getPosition();
-			vpSize = viewport->getSize();
-
-			dimensions.x = (int)(vpPos.x * renderSize.x);
-			dimensions.y = (int)(vpPos.y * renderSize.y);
-			dimensions.z = (int)(vpSize.x * renderSize.x);
-			dimensions.w = (int)(vpSize.y * renderSize.y);
-
-			glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
-			glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
-
-			viewport->renderSkybox(aspectRatio);
+			viewport->renderSkybox(renderSize);
 		}
 
 		// copy geometry's depth buffer to default framebuffer's depth buffer

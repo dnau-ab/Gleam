@@ -1,13 +1,13 @@
 #include "Material.h"
 
 Material::Material()
-	: _shininess(32.0f), _baseColor(glm::vec3(1.0, 1.0, 1.0)), _textures() {
-
+	: _shininess(32.0f), _baseColor(1.0f, 1.0f, 1.0f), _textures() {
+	_baseColorTextureID = Texture::getColorTextureID(_baseColor);
 }
 
 Material::Material(std::vector<Texture> textures) 
-	: _shininess(32.0f), _baseColor(1.0, 1.0, 1.0), _textures(textures) {
-
+	: _shininess(32.0f), _baseColor(1.0f, 1.0f, 1.0f), _textures(textures) {
+	_baseColorTextureID = Texture::getColorTextureID(_baseColor);
 }
 
 float Material::getShininess() {
@@ -16,6 +16,18 @@ float Material::getShininess() {
 
 void Material::setShininess(float shininess) {
 	_shininess = shininess;
+}
+
+glm::vec3 Material::getBaseColor() {
+	return _baseColor;
+}
+
+void Material::setBaseColor(const glm::vec3& color) {
+	_baseColor = color;
+	// set texture color
+	GLubyte data[] = { (GLubyte)(color.r * 255), (GLubyte)(color.g * 255), (GLubyte)(color.b * 255), 255 };
+	glBindTexture(GL_TEXTURE_2D, _baseColorTextureID);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
 }
 
 const std::vector<Texture> Material::getTextures() const {
@@ -40,7 +52,6 @@ void Material::removeTexture(const Texture& texture) {
 void Material::bind(Shader* shader) {
 	// set diffuse, specular, ... uniforms
 	shader->setFloat("material.shininess", _shininess);
-	shader->setVec3("baseColor", _baseColor);
 
 	// set texture uniforms
 	unsigned diffuseNum = 1;
@@ -72,10 +83,22 @@ void Material::bind(Shader* shader) {
 
 		glBindTexture(GL_TEXTURE_2D, _textures[i].getID());
 	}
-	if (_textures.size() == 0) {
+	if (diffuseNum == 1) {
 		// bind default diffuse texture
 		glActiveTexture(GL_TEXTURE0);
 		shader->setInt("material.diffuse1", 0);
-		glBindTexture(GL_TEXTURE_2D, Texture::getDefaultID());
+		glBindTexture(GL_TEXTURE_2D, _baseColorTextureID);
+	}
+	if (specularNum == 1) {
+		if (_defaultSpecularTextureID == 0) {
+			// initialize
+			_defaultSpecularTextureID = Texture::getColorTextureID({ 0.0f, 0.0f, 0.0f });
+		}
+		// bind default specular texture
+		glActiveTexture(GL_TEXTURE1);
+		shader->setInt("material.specular1", 1);
+		glBindTexture(GL_TEXTURE_2D, _defaultSpecularTextureID);
 	}
 }
+
+unsigned int Material::_defaultSpecularTextureID = 0;

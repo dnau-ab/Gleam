@@ -18,8 +18,8 @@ private:
 public:
 	Material material;
 
-	unsigned int numVertices();
-	unsigned int numIndices();
+	unsigned int getNumVertices();
+	unsigned int getNumIndices();
 
 	SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const std::vector<Texture>& textures);
 	SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices, const Material& material);

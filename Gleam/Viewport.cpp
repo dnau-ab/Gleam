@@ -16,6 +16,14 @@ void Viewport::setSize(glm::vec2 size) {
 	_size = size;
 }
 
+Shader* Viewport::getLightingShader() {
+	return &_lightingShader;
+}
+
+void Viewport::setLightingShader(Shader* shader) {
+	_lightingShader = *shader;
+}
+
 Skybox* Viewport::getSkybox() {
 	return _skybox;
 }
@@ -24,7 +32,15 @@ void Viewport::setSkybox(Skybox* skybox) {
 	_skybox = skybox;
 }
 
-void Viewport::renderSkybox(float aspectRatio) {
+void Viewport::renderSkybox(glm::vec2 renderSize) {
+
+	glm::vec4 dimensions = getDimensions(renderSize);
+
+	glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+	glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+
+	float aspectRatio = (float)dimensions.z / dimensions.w;
+
 	glm::mat4 projection = camera->getProjectionMatrix(aspectRatio, camera->getNearPlane(), camera->getFarPlane());
 	glm::mat4 view = camera->getViewMatrix();
 	
@@ -35,7 +51,14 @@ void Viewport::renderSkybox(float aspectRatio) {
 	}
 }
 
-void Viewport::renderGeometry(float aspectRatio) {
+void Viewport::renderGeometry(glm::vec2 renderSize) {
+	glm::vec4 dimensions = getDimensions(renderSize);
+
+	glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+	glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+
+	float aspectRatio = (float)dimensions.z / dimensions.w;
+
 	glm::mat4 projection = camera->getProjectionMatrix(aspectRatio, camera->getNearPlane(), camera->getFarPlane());
 	glm::mat4 view = camera->getViewMatrix();
 
@@ -47,13 +70,20 @@ void Viewport::renderGeometry(float aspectRatio) {
 
 }
 
-void Viewport::renderLighting() {
+void Viewport::renderLighting(glm::vec2 renderSize) {
+	glm::vec4 dimensions = getDimensions(renderSize);
+
+	glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
+
 	Shader* _lightingShader = &(this->_lightingShader);
 	_lightingShader->use();
 
 	_lightingShader->setInt("gPosition", 0);
 	_lightingShader->setInt("gNormal", 1);
 	_lightingShader->setInt("gColorSpec", 2);
+
+	_lightingShader->setVec2("viewportSize", _size);
+	_lightingShader->setVec2("viewportPosition", _position);
 
 	unsigned int numSpotLights = 0;
 	unsigned int numPointLights = 0;

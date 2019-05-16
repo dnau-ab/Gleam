@@ -38,11 +38,11 @@ SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned
 	init();
 }
 
-unsigned int SubMesh::numVertices() {
+unsigned int SubMesh::getNumVertices() {
 	return _vertices.size();
 }
 
-unsigned int SubMesh::numIndices() {
+unsigned int SubMesh::getNumIndices() {
 	return _indices.size();
 }
 
