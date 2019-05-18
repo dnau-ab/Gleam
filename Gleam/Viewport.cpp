@@ -34,7 +34,7 @@ void Viewport::setSkybox(Skybox* skybox) {
 
 void Viewport::renderSkybox(glm::vec2 renderSize) {
 
-	glm::vec4 dimensions = getDimensions(renderSize);
+	glm::vec<4, int> dimensions = getDimensions(renderSize);
 
 	glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 	glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
@@ -52,7 +52,7 @@ void Viewport::renderSkybox(glm::vec2 renderSize) {
 }
 
 void Viewport::renderGeometry(glm::vec2 renderSize) {
-	glm::vec4 dimensions = getDimensions(renderSize);
+	glm::vec<4, int> dimensions = getDimensions(renderSize);
 
 	glViewport(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 	glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
@@ -71,7 +71,7 @@ void Viewport::renderGeometry(glm::vec2 renderSize) {
 }
 
 void Viewport::renderLighting(glm::vec2 renderSize) {
-	glm::vec4 dimensions = getDimensions(renderSize);
+	glm::vec<4, int> dimensions = getDimensions(renderSize);
 
 	glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
 
@@ -93,7 +93,6 @@ void Viewport::renderLighting(glm::vec2 renderSize) {
 
 		SpotLight* sl = dynamic_cast<SpotLight*>(lights[i]);
 		if (sl != nullptr) {
-
 			numSpotLights++;
 			continue;
 		}

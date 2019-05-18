@@ -327,7 +327,7 @@ void Window::update() {
 		// geometry pass
 		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
 		glViewport(0, 0, (GLsizei)renderSize.x, (GLsizei)renderSize.y);
-		glScissor(0, 0, renderSize.x, renderSize.y);
+		glScissor(0, 0, (GLsizei)renderSize.x, (GLsizei)renderSize.y);
 		
 		glColorMask(true, true, true, true);
 		glDepthMask(true);
@@ -336,10 +336,6 @@ void Window::update() {
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		glm::vec2 vpPos;
-		glm::vec2 vpSize;
-		glm::vec<4, int> dimensions;
 
 		for (Viewport*& viewport : _viewports) {
 			viewport->renderGeometry(renderSize);
@@ -355,8 +351,8 @@ void Window::update() {
 		
 		// bind lighting framebuffer
 		glBindFramebuffer(GL_FRAMEBUFFER, _lBuffer);
-		glViewport(0, 0, renderSize.x, renderSize.y);
-		glScissor(0, 0, renderSize.x, renderSize.y);
+		glViewport(0, 0, (GLsizei)renderSize.x, (GLsizei)renderSize.y);
+		glScissor(0, 0, (GLsizei)renderSize.x, (GLsizei)renderSize.y);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -364,7 +360,7 @@ void Window::update() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _lBuffer); // write to lighting framebuffer
 
 		// blit to lighting framebuffer
-		glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, renderSize.x, renderSize.y, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, (GLint)renderSize.x, (GLint)renderSize.y, 0, 0, (GLint)renderSize.x, (GLint)renderSize.y, GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 		glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
 
 		for (Viewport*& viewport : _viewports) {
@@ -386,7 +382,7 @@ void Window::update() {
 			glScissor(0, 0, _windowSize.x, _windowSize.y);
 
 			if (_aspectMode == AspectMode::STRETCH) {
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+				glBlitFramebuffer(0, 0, (GLint)renderSize.x, (GLint)renderSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 			}
 			else {
 				glBlitFramebuffer(0, 0, _windowSize.x, _windowSize.y, 0, 0, _windowSize.x, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
@@ -401,7 +397,7 @@ void Window::update() {
 				glViewport(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
 				glScissor(0 + diff, 0, _windowSize.x - diff * 2, _windowSize.y);
 
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0 + diff, 0, _windowSize.x - diff, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+				glBlitFramebuffer(0, 0, (GLint)renderSize.x, (GLint)renderSize.y, 0 + diff, 0, _windowSize.x - diff, _windowSize.y, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 			}
 			else {
 				// clamp y
@@ -409,7 +405,7 @@ void Window::update() {
 				glViewport(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
 				glScissor(0, 0 + diff, _windowSize.x, _windowSize.y - diff * 2);
 
-				glBlitFramebuffer(0, 0, renderSize.x, renderSize.y, 0, 0 + diff, _windowSize.x, _windowSize.y - diff, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
+				glBlitFramebuffer(0, 0, (GLint)renderSize.x, (GLint)renderSize.y, 0, 0 + diff, _windowSize.x, _windowSize.y - diff, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT, GL_NEAREST);
 			}
 		}
 

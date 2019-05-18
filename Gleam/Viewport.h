@@ -25,7 +25,7 @@
 class Viewport {
 private:
 	glm::vec4 getDimensions(glm::vec2 renderSize) {
-		glm::vec4 dimensions;
+		glm::vec<4, int> dimensions;
 		dimensions.x = (int)(_position.x * renderSize.x);
 		dimensions.y = (int)(_position.y * renderSize.y);
 		dimensions.z = (int)(_size.x * renderSize.x);
