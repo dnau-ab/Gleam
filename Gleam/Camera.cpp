@@ -1,13 +1,13 @@
 #include "Camera.h"
 
-void Camera::setMovement(Camera_Movement movement) {
-	movementVector |= movement;
+void Camera::setMovement(CameraMovement movement) {
+	movementVector |= (uint8_t)movement;
 }
 
-void Camera::unsetMovement(Camera_Movement movement) {
-	movementVector &= ~movement;
+void Camera::unsetMovement(CameraMovement movement) {
+	movementVector &= ~(uint8_t)movement;
 }
 
-bool Camera::isMovementSet(Camera_Movement movement) {
-	return movementVector & movement;
+bool Camera::isMovementSet(CameraMovement movement) {
+	return movementVector &(uint8_t)movement;
 }

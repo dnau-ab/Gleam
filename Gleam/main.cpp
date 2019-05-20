@@ -11,13 +11,15 @@
 #include "Cone.h"
 #include "Cylinder.h"
 
+#include <glm/gtx/color_space.hpp>
+
 void keyHandler (Window* window, int key, int scancode, int action, int mods);
 void mouseHandler (Window* window, double xPos, double yPos);
 void scrollHandler(Window* window, double xOffset, double yOffset);
 
 CameraFree camera(glm::vec3(0.0f, 10.0f, 80.0f));
 bool cameraEnabled;
-uint8_t movement = Camera_Movement::NONE;
+uint8_t movement = (uint8_t)CameraMovement::NONE;
 
 constexpr unsigned HEIGHT = 720;
 constexpr unsigned WIDTH = (unsigned)(HEIGHT * 16 / 9.0);
@@ -34,23 +36,6 @@ int main() {
 	testScene();
 	testMeshLoader();
 	testModel();
-	/*
-	while (!w.shouldClose() || !w2.shouldClose()) {
-		if (!w.shouldClose()) {
-			w.update();
-		}
-		else {
-			w.close();
-		}
-
-		if (!w2.shouldClose()) {
-			w2.update();
-		}
-		else {
-			w2.close();
-		}
-	}
-	*/
 	w.close();
 	w2.close();
 #endif
@@ -87,9 +72,10 @@ int main() {
 	battlefield.transform.scale({ 100, 100, 100 });
 	scene.addRenderable(&battlefield);
 	*/
-	std::shared_ptr<Mesh> squirtleMesh = MeshLoader::loadMesh("res/models/Squirtle", "Squirtle.fbx");
+	std::shared_ptr<Mesh> squirtleMesh = MeshLoader::loadMesh("res/models/Joker", "Joker.fbx");
 	Model squirtle(squirtleMesh);
 	squirtle.transform.rotate({ 90, 0, 0 });
+	squirtle.transform.translate({ 0, 0, 20 });
 	scene.addRenderable(&squirtle);
 
 	Model joker(MeshLoader::loadMesh("res/models/Joker", "Morgana Car.fbx"));
@@ -130,25 +116,31 @@ int main() {
 	Viewport right(0.5f, 0, 0.5f, 1.0f);
 	right.scene = &scene;
 	right.camera = &camera;
-	Shader customLighting("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/custom/shader_def_lighting.frag");
+
+	float hue = 0.0f;
+
+	Shader customLighting("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/custom/inversion.frag");
+	ShaderResource customResource;
+	customResource.setVec3("cameraFront", camera.front);
+	customResource.setVec3("shadowColor", glm::rgbColor(glm::vec3( hue / 255.0f, 1.0f, 1.0f )));
 	right.setLightingShader(&customLighting);
 
 	Shader skyboxShader("res/shaders/gleam_default_skybox_shader.vert", "res/shaders/gleam_default_skybox_shader.frag");
 	std::vector<std::string> faces{
-			"res/arrakisday_ft.tga",
-			"res/arrakisday_bk.tga",
-			"res/arrakisday_up.tga",
-			"res/arrakisday_dn.tga",
-			"res/arrakisday_rt.tga",
-			"res/arrakisday_lf.tga"
+			"res/skyboxes/desert_p/arrakisday_ft.tga",
+			"res/skyboxes/desert_p/arrakisday_bk.tga",
+			"res/skyboxes/desert_p/arrakisday_up.tga",
+			"res/skyboxes/desert_p/arrakisday_dn.tga",
+			"res/skyboxes/desert_p/arrakisday_rt.tga",
+			"res/skyboxes/desert_p/arrakisday_lf.tga"
 	};
 	Skybox skybox(faces, &skyboxShader);
 	left.setSkybox(&skybox);
 	right.setSkybox(&skybox);
 
 	
-	constexpr float numHorz = 3;
-	constexpr float numVert = 3;
+	constexpr float numHorz = 1;
+	constexpr float numVert = 1;
 	const float vWidth = 1.0f / numHorz;
 	const float vHeight = 1.0f / numVert;
 	std::vector<std::unique_ptr<Viewport> > viewports;
@@ -167,7 +159,8 @@ int main() {
 		viewport->setSkybox(&skybox);
 	}
 	
-	viewports[4]->setLightingShader(&customLighting);
+	viewports[0]->setLightingShader(&customLighting);
+	viewports[0]->setResource(&customResource);
 
 	//window.addViewport(&left);
 	//window.addViewport(&right);
@@ -201,7 +194,14 @@ int main() {
 
 		cone.material.setBaseColor({ 1.0f, sin(time) * 0.5f + 0.5f, 1.0f });
 
-		dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
+		glm::vec3 color = glm::rgbColor(glm::vec3(hue, 1.0f, 1.0f));
+
+		//dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
+		customResource.setVec3("cameraFront", camera.front);
+		customResource.setVec3("shadowColor", color);
+		
+		hue += 100.0f * deltaTime;
+		hue = fmod(hue, 360.0f);
 		window.update();
 	}
 	window.close();
@@ -222,28 +222,28 @@ void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // point mode
 			break;
 		case GLFW_KEY_W:
-			camera.setMovement(Camera_Movement::FORWARD);
+			camera.setMovement(CameraMovement::FORWARD);
 			break;
 		case GLFW_KEY_S:
-			camera.setMovement(Camera_Movement::BACKWARD);
+			camera.setMovement(CameraMovement::BACKWARD);
 			break;
 		case GLFW_KEY_A:
-			camera.setMovement(Camera_Movement::LEFT);
+			camera.setMovement(CameraMovement::LEFT);
 			break;
 		case GLFW_KEY_D:
-			camera.setMovement(Camera_Movement::RIGHT);
+			camera.setMovement(CameraMovement::RIGHT);
 			break;
 		case GLFW_KEY_SPACE:
-			camera.setMovement(Camera_Movement::UP);
+			camera.setMovement(CameraMovement::UP);
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
-			camera.setMovement(Camera_Movement::DOWN);
+			camera.setMovement(CameraMovement::DOWN);
 			break;
 		case GLFW_KEY_Q:
-			camera.setMovement(Camera_Movement::ROLL_LEFT);
+			camera.setMovement(CameraMovement::ROLL_LEFT);
 			break;
 		case GLFW_KEY_E:
-			camera.setMovement(Camera_Movement::ROLL_RIGHT);
+			camera.setMovement(CameraMovement::ROLL_RIGHT);
 			break;
 		case GLFW_KEY_1:
 			window->setCursorMode(GLFW_CURSOR_DISABLED);
@@ -272,28 +272,28 @@ void keyHandler(Window* window, int key, int scancode, int action, int mods) {
 	else if (action == GLFW_RELEASE) {
 		switch (key) {
 		case GLFW_KEY_W:
-			camera.unsetMovement(Camera_Movement::FORWARD);
+			camera.unsetMovement(CameraMovement::FORWARD);
 			break;
 		case GLFW_KEY_S:
-			camera.unsetMovement(Camera_Movement::BACKWARD);
+			camera.unsetMovement(CameraMovement::BACKWARD);
 			break;
 		case GLFW_KEY_A:
-			camera.unsetMovement(Camera_Movement::LEFT);
+			camera.unsetMovement(CameraMovement::LEFT);
 			break;
 		case GLFW_KEY_D:
-			camera.unsetMovement(Camera_Movement::RIGHT);
+			camera.unsetMovement(CameraMovement::RIGHT);
 			break;
 		case GLFW_KEY_SPACE:
-			camera.unsetMovement(Camera_Movement::UP);
+			camera.unsetMovement(CameraMovement::UP);
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
-			camera.unsetMovement(Camera_Movement::DOWN);
+			camera.unsetMovement(CameraMovement::DOWN);
 			break;
 		case GLFW_KEY_Q:
-			camera.unsetMovement(Camera_Movement::ROLL_LEFT);
+			camera.unsetMovement(CameraMovement::ROLL_LEFT);
 			break;
 		case GLFW_KEY_E:
-			camera.unsetMovement(Camera_Movement::ROLL_RIGHT);
+			camera.unsetMovement(CameraMovement::ROLL_RIGHT);
 			break;
 		}
 	}

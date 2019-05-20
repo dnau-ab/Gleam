@@ -160,7 +160,7 @@ void ShaderResource::setVec3(const std::string& name, const glm::vec<3, float>& 
 	}
 	else {
 		*(itr->second.data.vec3_value) = value;
-		itr->second.type = GleamType::VEC2;
+		itr->second.type = GleamType::VEC3;
 	}
 }
 void ShaderResource::setVec3(const std::string& name, float v1, float v2, float v3) {

@@ -26,7 +26,7 @@ public:
 	glm::mat4 getViewMatrix() override;
 	glm::mat4 getProjectionMatrix(float aspectRatio, float nearPlane, float farPlane) override;
 
-	void processKeyboard(Camera_Movement direction, float deltaTime);
+	void processKeyboard(CameraMovement direction, float deltaTime);
 	void processMouseMovement(float xoffset, float yoffset);
 	void processMouseScroll(float yoffset);
 	

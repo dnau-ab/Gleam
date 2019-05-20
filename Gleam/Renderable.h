@@ -9,6 +9,7 @@ class Renderable {
 protected:
 	Shader* _shader;
 	ShaderResource* _shaderResource;
+	void updateResource();
 
 public:
 	Transform transform;

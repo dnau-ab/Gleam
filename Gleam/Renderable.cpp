@@ -12,3 +12,10 @@ void Renderable::setShader(Shader* shader) {
 void Renderable::setResource(ShaderResource& resource) {
 	_shaderResource = &resource;
 }
+
+void Renderable::updateResource() {
+	if (_shaderResource == nullptr) return;
+	for (auto itr = _shaderResource->begin(); itr != _shaderResource->end(); itr++) {
+		_shader->setUniform(itr->first, itr->second);
+	}
+}
