@@ -75,6 +75,7 @@ public:
 
 	void addViewport(Viewport* viewport);
 	void removeViewport(Viewport* viewport);
+	void clearViewports();
 	void setCursorMode(int type);
 
 	void setResolution(unsigned int width, unsigned int height);
