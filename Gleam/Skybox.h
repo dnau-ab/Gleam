@@ -68,6 +68,8 @@ protected:
 	}
 
 public:
+	Transform transform;
+
 	Skybox(std::vector<std::string> faces, Shader* shader) {
 		_shader = shader;
 		_textureID = Texture::loadCubemap(faces);
@@ -78,7 +80,8 @@ public:
 		glDepthFunc(GL_LEQUAL);
 		if (_shader != nullptr) {
 			_shader->use();
-			_shader->setMat4("view", glm::mat4(glm::mat3(view)));
+			glm::mat4 newView = view * glm::mat4_cast(transform.getRotation());
+			_shader->setMat4("view", glm::mat4(glm::mat3(newView)));
 			_shader->setMat4("projection", projection);
 			_shader->setInt("skybox", 0);
 		}
