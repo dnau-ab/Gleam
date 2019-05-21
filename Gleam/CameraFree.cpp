@@ -9,7 +9,7 @@ void CameraFree::updateCameraVectors()
 }
 
 // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
-void CameraFree::processKeyboard(Camera_Movement direction, float deltaTime)
+void CameraFree::processKeyboard(CameraMovement direction, float deltaTime)
 {
 
 }
@@ -60,31 +60,31 @@ void CameraFree::update(float deltaTime) {
 	float velocity = movementSpeed * deltaTime;
 	//printf("DIR: %f\nV: %f\nMVS: %f\nDT: %f\n\n", front * velocity, velocity, movementSpeed, deltaTime);
 	if (movementVector) {
-		if (movementVector & FORWARD) {
+		if (movementVector & (uint8_t)CameraMovement::FORWARD) {
 			transform.translate(front * velocity);
 		}
-		if (movementVector & BACKWARD) {
+		if (movementVector & (uint8_t)CameraMovement::BACKWARD) {
 			transform.translate(-(front * velocity));
 		}
-		if (movementVector & LEFT) {
+		if (movementVector & (uint8_t)CameraMovement::LEFT) {
 			transform.translate(-(right * velocity));
 		}
-		if (movementVector & RIGHT) {
+		if (movementVector & (uint8_t)CameraMovement::RIGHT) {
 			transform.translate(right * velocity);
 		}
-		if (movementVector & UP) {
+		if (movementVector & (uint8_t)CameraMovement::UP) {
 			transform.translate(up * velocity);
 		}
-		if (movementVector & DOWN) {
+		if (movementVector & (uint8_t)CameraMovement::DOWN) {
 			transform.translate(-(up * velocity));
 		}
-		if (movementVector & ROLL_LEFT) {
+		if (movementVector & (uint8_t)CameraMovement::ROLL_LEFT) {
 			glm::quat rollQuat = glm::angleAxis(-200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 			glm::quat keyQuat = rollQuat * transform.getRotation();
 			transform.setRotation(keyQuat);
 			updateCameraVectors();
 		}
-		if (movementVector & ROLL_RIGHT) {
+		if (movementVector & (uint8_t)CameraMovement::ROLL_RIGHT) {
 			glm::quat rollQuat = glm::angleAxis(200 * mouseSensitivity * deltaTime, glm::vec3(0.0f, 0.0f, 1.0f));
 			glm::quat keyQuat = rollQuat * transform.getRotation();
 			transform.setRotation(keyQuat);

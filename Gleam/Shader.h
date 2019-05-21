@@ -17,12 +17,15 @@ class Shader {
 protected:
 	unsigned int _ID;
 	static Shader* _defaultShader;
+	static Shader* _defaultLightingShader;
 
 	void checkCompileErrors(GLuint shader, std::string type);
 public:
 	Shader(const std::string& vertexPath, const std::string& fragmentPath);
 
 	static Shader* getDefault();
+	static Shader* getDefaultLighting();
+
 	unsigned int getID();
 	void use();
 

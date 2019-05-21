@@ -15,7 +15,7 @@
 const float DEFAULT_NEAR_PLANE = 0.5f;
 const float DEFAULT_FAR_PLANE = 1000.0f;
 
-enum Camera_Movement {
+enum class CameraMovement {
 	NONE = 0,
 	FORWARD = 1,
 	BACKWARD = 2,
@@ -36,13 +36,13 @@ protected:
 		glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), 
 		glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f), 
 		float nearPlane = DEFAULT_NEAR_PLANE, float farPlane = DEFAULT_FAR_PLANE)
-		: transform(position, rotation), worldUp(worldUp), up(worldUp), front(0.0f, 0.0f, -1.0f), _nearPlane(nearPlane), _farPlane(farPlane), movementVector(Camera_Movement::NONE) {}
+		: transform(position, rotation), worldUp(worldUp), up(worldUp), front(0.0f, 0.0f, -1.0f), _nearPlane(nearPlane), _farPlane(farPlane), movementVector((uint8_t)CameraMovement::NONE) {}
 
 	Camera(float posX, float posY, float posZ, 
 		float rotX, float rotY, float rotZ,
 		float worldUpX, float worldUpY, float worldUpZ,
 		float nearPlane = DEFAULT_NEAR_PLANE, float farPlane = DEFAULT_FAR_PLANE)
-		: transform(glm::vec3(posX, posY, posZ), glm::vec3(rotX, rotY, rotZ)), worldUp(worldUpX, worldUpY, worldUpZ), up(worldUpX, worldUpY, worldUpZ), front(0.0f, 0.0f, -1.0f), _nearPlane(nearPlane), _farPlane(farPlane), movementVector(Camera_Movement::NONE) {}
+		: transform(glm::vec3(posX, posY, posZ), glm::vec3(rotX, rotY, rotZ)), worldUp(worldUpX, worldUpY, worldUpZ), up(worldUpX, worldUpY, worldUpZ), front(0.0f, 0.0f, -1.0f), _nearPlane(nearPlane), _farPlane(farPlane), movementVector((uint8_t)CameraMovement::NONE) {}
 
 	virtual void updateCameraVectors() = 0;
 	uint8_t movementVector;
@@ -72,9 +72,9 @@ public:
 		_farPlane = farPlane;
 	}
 
-	void setMovement(Camera_Movement movement);
-	void unsetMovement(Camera_Movement movement);
-	bool isMovementSet(Camera_Movement movement);
+	void setMovement(CameraMovement movement);
+	void unsetMovement(CameraMovement movement);
+	bool isMovementSet(CameraMovement movement);
 
 	virtual void update(float deltaTime) = 0;
 };

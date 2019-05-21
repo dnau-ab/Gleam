@@ -17,6 +17,9 @@ void Model::render(const glm::mat4& projection, const glm::mat4& view) {
 		_shader->setMat4("view", view);
 		_shader->setMat4("model", transform.getTransformationMatrix());
 		_shader->setMat3("normalMat", getNormalMatrix());
+
+		updateResource();
+
 		_mesh->render(_shader);
 	}
 }

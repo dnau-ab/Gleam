@@ -442,7 +442,7 @@ void Window::setResolution(const glm::vec<2, unsigned>& resolution) {
 }
 
 glm::vec<2, unsigned> Window::getResolution() const {
-	return _resolution;
+	return (_aspectMode == AspectMode::FREE) ? _windowSize : _resolution;
 }
 
 void Window::setAspectMode(AspectMode mode) {

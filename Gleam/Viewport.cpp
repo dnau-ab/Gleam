@@ -17,11 +17,11 @@ void Viewport::setSize(glm::vec2 size) {
 }
 
 Shader* Viewport::getLightingShader() {
-	return &_lightingShader;
+	return _lightingShader;
 }
 
 void Viewport::setLightingShader(Shader* shader) {
-	_lightingShader = *shader;
+	_lightingShader = shader;
 }
 
 Skybox* Viewport::getSkybox() {
@@ -74,8 +74,7 @@ void Viewport::renderLighting(glm::vec2 renderSize) {
 	glm::vec<4, int> dimensions = getDimensions(renderSize);
 
 	glScissor(dimensions.x, dimensions.y, dimensions.z, dimensions.w);
-
-	Shader* _lightingShader = &(this->_lightingShader);
+	
 	_lightingShader->use();
 
 	_lightingShader->setInt("gPosition", 0);
@@ -125,7 +124,20 @@ void Viewport::renderLighting(glm::vec2 renderSize) {
 	}
 	_lightingShader->setVec3("viewPos", camera->transform.getPosition());
 
+	updateResource();
+
 	_lightingShader->setInt("numSpotLights", numSpotLights);
 	_lightingShader->setInt("numPointLights", numPointLights);
 	_lightingShader->setInt("numDirectionalLights", numDirLights);
+}
+
+void Viewport::updateResource() {
+	if (_shaderResource == nullptr) return;
+	for (auto itr = _shaderResource->begin(); itr != _shaderResource->end(); itr++) {
+		_lightingShader->setUniform(itr->first, itr->second);
+	}
+}
+
+void Viewport::setResource(ShaderResource* resource) {
+	_shaderResource = resource;
 }
