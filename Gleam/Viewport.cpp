@@ -82,9 +82,6 @@ void Viewport::renderLighting(glm::vec2 renderSize) {
 	_lightingShader->setInt("gNormal", 1);
 	_lightingShader->setInt("gColorSpec", 2);
 
-	_lightingShader->setVec2("viewportSize", _size);
-	_lightingShader->setVec2("viewportPosition", _position);
-
 	unsigned int numSpotLights = 0;
 	unsigned int numPointLights = 0;
 	unsigned int numDirLights = 0;
