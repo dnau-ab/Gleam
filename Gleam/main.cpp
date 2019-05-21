@@ -119,10 +119,11 @@ int main() {
 
 	float hue = 0.0f;
 
-	Shader customLighting("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/custom/inversion.frag");
+	Shader customLighting("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/custom/pixelate.frag");
 	ShaderResource customResource;
-	customResource.setVec3("cameraFront", camera.front);
-	customResource.setVec3("shadowColor", glm::rgbColor(glm::vec3( hue / 255.0f, 1.0f, 1.0f )));
+	//customResource.setVec3("cameraFront", camera.front);
+	//customResource.setVec3("shadowColor", glm::rgbColor(glm::vec3( hue / 255.0f, 1.0f, 1.0f )));
+	customResource.setInt("sampleRadius", 16);
 	right.setLightingShader(&customLighting);
 
 	Shader skyboxShader("res/shaders/gleam_default_skybox_shader.vert", "res/shaders/gleam_default_skybox_shader.frag");
@@ -197,9 +198,10 @@ int main() {
 		glm::vec3 color = glm::rgbColor(glm::vec3(hue, 1.0f, 1.0f));
 
 		//dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
-		customResource.setVec3("cameraFront", camera.front);
-		customResource.setVec3("shadowColor", color);
-		
+		//customResource.setVec3("cameraFront", camera.front);
+		//customResource.setVec3("shadowColor", color);
+		customResource.setVec2("texSize", window.getResolution());
+
 		hue += 100.0f * deltaTime;
 		hue = fmod(hue, 360.0f);
 		window.update();
