@@ -60,6 +60,8 @@ protected:
 	AspectMode _aspectMode;
 	bool _remakeFrameBuffer;
 
+	ShaderResource* _shaderResource;
+
 	/*TODO **Destructor** */
 public:
 	typedef void(*KeyCallback)(Window* window, int key, int scancode, int action, int mods);
@@ -86,6 +88,9 @@ public:
 
 	void setPostProcessingShader(Shader* shader);
 	Shader* getPostProcessingShader(Shader* shader);
+
+	void setResource(ShaderResource* resource);
+	void updateResource();
 
 	void setAspectMode(AspectMode mode);
 	AspectMode getAspectMode();
