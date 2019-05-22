@@ -39,6 +39,8 @@ private:
 	unsigned int _lBuffer = 0;
 	unsigned int _lColor = 0;
 
+	Shader* _postProcessingShader = nullptr;
+
 	std::unique_ptr<Quad> _screenQuad = nullptr;
 
 	void initLBuffer();
@@ -81,6 +83,9 @@ public:
 	void setResolution(unsigned int width, unsigned int height);
 	void setResolution(const glm::vec<2, unsigned>& resolution);
 	glm::vec<2, unsigned> getResolution() const;
+
+	void setPostProcessingShader(Shader* shader);
+	Shader* getPostProcessingShader(Shader* shader);
 
 	void setAspectMode(AspectMode mode);
 	AspectMode getAspectMode();

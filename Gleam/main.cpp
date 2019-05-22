@@ -45,6 +45,9 @@ int main() {
 	window.mouseCallback = mouseHandler;
 	window.scrollCallback = scrollHandler;
 
+	Shader postProcessingShader("res/shaders/gleam_default_postprocess_shader.vert", "res/shaders/custom/post_greenscale.frag");
+	window.setPostProcessingShader(&postProcessingShader);
+
 	std::shared_ptr<Mesh> variaMesh = MeshLoader::loadMesh("res/models/variasuit/", "DolBarriersuit.obj", true);
 	//std::shared_ptr<Mesh> variaMesh = MeshLoader::loadMesh("res/models/bulbasaur/", "Pokemon.obj", true);
 	if (variaMesh) {
@@ -76,12 +79,12 @@ int main() {
 	Model squirtle(squirtleMesh);
 	squirtle.transform.rotate({ 90, 0, 0 });
 	squirtle.transform.translate({ 0, 0, 20 });
-	scene.addRenderable(&squirtle);
+	//scene.addRenderable(&squirtle);
 
 	Model joker(MeshLoader::loadMesh("res/models/Joker", "Morgana Car.fbx"));
 	joker.transform.rotate({ 90, 0, 0 });
 	joker.transform.translate({ 15, 0, 15 });
-	scene.addRenderable(&joker);
+	//scene.addRenderable(&joker);
 
 	// add floor quad
 	Quad* quad = new Quad(Shader::getDefault());
@@ -119,7 +122,7 @@ int main() {
 
 	float hue = 0.0f;
 
-	Shader customLighting("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/custom/pixelate.frag");
+	Shader customLighting("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/custom/gleam_default_shader_def_lighting.frag");
 	ShaderResource customResource;
 	//customResource.setVec3("cameraFront", camera.front);
 	//customResource.setVec3("shadowColor", glm::rgbColor(glm::vec3( hue / 255.0f, 1.0f, 1.0f )));
@@ -195,12 +198,14 @@ int main() {
 
 		cone.material.setBaseColor({ 1.0f, sin(time) * 0.5f + 0.5f, 1.0f });
 
+		//skybox.transform.rotate({ 10.0f * deltaTime, 0.0f, 0.0f });
+
 		glm::vec3 color = glm::rgbColor(glm::vec3(hue, 1.0f, 1.0f));
 
 		//dLight.direction = glm::normalize(glm::vec3(5*cos(time), 0, 5 * sin(time)));
 		//customResource.setVec3("cameraFront", camera.front);
 		//customResource.setVec3("shadowColor", color);
-		customResource.setVec2("texSize", window.getResolution());
+		//customResource.setVec2("texSize", window.getResolution());
 
 		hue += 100.0f * deltaTime;
 		hue = fmod(hue, 360.0f);

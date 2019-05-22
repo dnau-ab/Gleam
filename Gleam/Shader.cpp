@@ -2,6 +2,7 @@
 
 Shader* Shader::_defaultShader = nullptr;
 Shader* Shader::_defaultLightingShader = nullptr;
+Shader* Shader::_defaultPostProcessingShader = nullptr;
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 	std::string vertexCode;
@@ -72,6 +73,13 @@ Shader* Shader::getDefaultLighting() {
 		_defaultLightingShader = new Shader("res/shaders/gleam_default_shader_def_lighting.vert", "res/shaders/gleam_default_shader_def_lighting.frag");
 	}
 	return _defaultLightingShader;
+}
+
+Shader* Shader::getDefaultPostProcessingShader() {
+	if (_defaultPostProcessingShader == nullptr) {
+		_defaultPostProcessingShader = new Shader("res/shaders/gleam_default_postprocess_shader.vert", "res/shaders/gleam_default_postprocess_shader.frag");
+	}
+	return _defaultPostProcessingShader;
 }
 
 unsigned int Shader::getID() {

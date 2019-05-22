@@ -18,6 +18,7 @@ protected:
 	unsigned int _ID;
 	static Shader* _defaultShader;
 	static Shader* _defaultLightingShader;
+	static Shader* _defaultPostProcessingShader;
 
 	void checkCompileErrors(GLuint shader, std::string type);
 public:
@@ -25,6 +26,7 @@ public:
 
 	static Shader* getDefault();
 	static Shader* getDefaultLighting();
+	static Shader* getDefaultPostProcessingShader();
 
 	unsigned int getID();
 	void use();
