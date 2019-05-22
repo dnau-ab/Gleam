@@ -75,7 +75,7 @@ Shader* Shader::getDefaultLighting() {
 	return _defaultLightingShader;
 }
 
-Shader* Shader::getDefaultPostProcessingShader() {
+Shader* Shader::getDefaultPostProcessing() {
 	if (_defaultPostProcessingShader == nullptr) {
 		_defaultPostProcessingShader = new Shader("res/shaders/gleam_default_postprocess_shader.vert", "res/shaders/gleam_default_postprocess_shader.frag");
 	}

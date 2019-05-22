@@ -26,7 +26,7 @@ public:
 
 	static Shader* getDefault();
 	static Shader* getDefaultLighting();
-	static Shader* getDefaultPostProcessingShader();
+	static Shader* getDefaultPostProcessing();
 
 	unsigned int getID();
 	void use();

@@ -239,7 +239,7 @@ Window::Window(std::string title, unsigned int width, unsigned int height, unsig
 		glEnable(GL_STENCIL_TEST);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-		_postProcessingShader = Shader::getDefaultPostProcessingShader();
+		_postProcessingShader = Shader::getDefaultPostProcessing();
 
 		_screenQuad = std::make_unique<Quad>(nullptr);
 
